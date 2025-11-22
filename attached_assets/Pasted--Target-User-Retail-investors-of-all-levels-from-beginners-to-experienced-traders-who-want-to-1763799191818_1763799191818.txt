@@ -1,0 +1,71 @@
+🎯 Target User
+
+Retail investors of all levels — from beginners to experienced traders — who want to understand why a stock is moving, not just see the data.
+They seek clarity, simplicity, and human interpretation rather than technical overload.
+
+⸻
+
+💡 Core Problem
+
+Current platforms (Finviz, TradingView, etc.) overwhelm users with expert-level charts and jargon.
+Retail investors struggle to interpret:
+	•	What financial metrics and ratios actually mean,
+	•	How geopolitical or insider events affect a company,
+	•	The significance of rumors, news, and institutional moves.
+
+They need an AI interpreter — not another dashboard.
+
+⸻
+
+🚀 Primary Goal
+
+Provide an all-in-one “stock story” for any ticker — integrating official and unofficial data, analyzing it deeply, and explaining it in human terms with reasoning, visuals, and clear recommendations.
+
+⸻
+
+🧠 Core Features (V1 Must-Haves)
+	•	Single Stock Deep Analysis: One ticker, full contextual breakdown.
+	•	Human-readable summary: Plain-language explanation of the company’s health, risks, and opportunities.
+	•	Official + Unofficial Data Sources: Integrate financial APIs (Yahoo, Alpha Vantage, SEC EDGAR) + Reddit, X/Twitter, and news.
+	•	Geopolitical & Insider Context: Identify potential impacts of political events, institutional players, or insider activity.
+	•	Visual Summaries: Simple, minimal charts — valuation, trend, and risk visualization.
+	•	AI Layer (LLM-powered):
+	•	Interpret data and generate insights.
+	•	Translate financial jargon into everyday English.
+	•	Suggest “Buy / Hold / Sell” with reasoning and uncertainty ranges.
+
+⸻
+
+🌱 Nice-to-Have / Future Additions
+	•	Sentiment graphs and social buzz trends
+	•	Portfolio tracking and watchlists
+	•	Automated alerts for new opportunities
+	•	Custom scanning and filters
+	•	Multi-stock comparisons and strategy testing
+
+⸻
+
+💻 Technical & Design Direction
+	•	Environment: Web app (Cursor, GitHub, Vercel compatible).
+	•	Tech Stack: Likely TypeScript + React + Node.js backend; LLM integration (OpenAI or local model).
+	•	AI-first approach: From day one, use AI for interpretation, not just data display.
+	•	UI/UX: Chat-driven companion — simple, minimal, narrative + visuals blend.
+	•	Architecture: Start as a local proof-of-concept (no scaling required yet).
+	•	Launch goal: Alpha in weeks, not months.
+
+⸻
+
+💎 Value Proposition
+
+“Explain the real story behind any stock — in human language.”
+
+Emotional payoff: clarity, confidence, and empowerment for retail investors.
+Functional edge: unified interpretation of official, unofficial, and human perspectives — something no current tool delivers.
+
+⸻
+
+⚠️ Key Assumptions / Risks
+	•	Access to unofficial or social data may face API or TOS limitations.
+	•	Explaining financial topics “in plain English” requires consistent model fine-tuning or prompt precision.
+	•	Rumor and sentiment data must be clearly labeled to avoid misleading users.
+	•	Alpha version must maintain simplicity — resist scope creep into portfolio tools too early.
