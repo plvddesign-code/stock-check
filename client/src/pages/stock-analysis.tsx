@@ -30,6 +30,11 @@ export default function StockAnalysis() {
 
   const { data: chartData, isLoading: chartLoading } = useQuery<Array<{ date: string; close: number }>>({
     queryKey: ["/api/stock", ticker, "historical", chartPeriodDays],
+    queryFn: async () => {
+      const response = await fetch(`/api/stock/${ticker}/historical?days=${chartPeriodDays}`);
+      if (!response.ok) throw new Error("Failed to fetch historical prices");
+      return response.json();
+    },
     enabled: !!ticker,
     staleTime: 5 * 60 * 1000,
   });
