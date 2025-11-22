@@ -185,9 +185,12 @@ Preferred communication style: Simple, everyday language.
 - `SESSION_SECRET` - Session management
 
 **Deployment Ready**: The project is packaged in `dist/` folder and ready to deploy to:
+- Vercel (serverless deployment - recommended)
 - Replit (native deployment via publish button)
 - Any Node.js hosting platform
 - Docker containers
+
+**Vercel Deployment**: See VERCEL_DEPLOYMENT.md for complete setup guide
 
 ## Recent Enhancements
 
