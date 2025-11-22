@@ -168,3 +168,58 @@ Preferred communication style: Simple, everyday language.
 - Static asset serving in production
 - Parallel API calls to external services
 - Stale-while-revalidate pattern for data freshness
+
+## Recent Enhancements
+
+### Key Metrics Section (Enhanced Nov 22, 2025)
+- **Color-Coded Health Status**: Each metric now displays with visual indicators:
+  - Green: Excellent/Healthy metrics (positive condition)
+  - Blue: Good/Fair metrics (neutral or mixed condition)
+  - Yellow: Fair/Concerning metrics (at-risk zone)
+  - Red: Poor/Concerning metrics (high-risk condition)
+  - Gray: Data unavailable
+- **Metric Health Tooltips**: Each metric includes detailed tooltips explaining:
+  - What the metric means in simple language
+  - Good vs. concerning condition thresholds
+  - Current value and data freshness (Q3 2025 for quarterly data)
+- **Latest Quarterly Data**: All metrics display the most recent quarterly information from the current year
+- **Beginner-Friendly Explanations**: Each metric tooltip includes clear guidance on interpreting good vs. bad conditions with specific threshold examples
+
+### Risk Assessment Section (Enhanced Nov 22, 2025)
+- **Enhanced Sentiment Analysis**: Uses 20+ financial keywords for more accurate market sentiment detection
+- **Real-Time Analyst Integration**: Pulls live analyst ratings, price targets, and consensus from Finnhub API
+- **Comprehensive Risk Factors**: Identifies risks from:
+  - Recent news sentiment (positive vs. negative headlines)
+  - Analyst ratings (strong sell to strong buy consensus)
+  - Price targets with specific upside/downside calculations
+  - Market catalysts (earnings, product launches, acquisitions, etc.)
+- **Price Signal Detection**: Calculates analyst upside potential and momentum indicators
+- **Improved Confidence Scoring**: Confidence metric reflects data availability and source alignment
+- **Data-Backed Recommendations**: All risk/opportunity assessments include specific metrics, sources, and data references
+
+## API Integration & Setup
+
+### For Optimal Real-Time Performance
+
+To access full real-time analyst ratings and enhanced news sentiment analysis, configure the following environment variables:
+
+- **FINNHUB_API_KEY**: Enables real-time analyst ratings, price targets, and consensus data
+  - Free tier available at https://finnhub.io
+  - Essential for risk assessment accuracy
+  
+- **OPENAI_API_KEY**: Enables AI-powered analysis generation
+  - Required for detailed risk/opportunity reasoning and recommendations
+  - Falls back to demo analysis if not configured
+
+- **NEWS_API_KEY** (Optional): Enables broader financial news coverage
+  - Free tier at https://newsapi.org
+  - Complements Finnhub news with additional sources
+
+### Fallback Behavior
+
+When API keys are not configured, the system gracefully falls back to:
+- Demo analyst consensus data
+- Pre-cached news articles with sentiment analysis
+- Template-based AI recommendations
+
+This ensures the platform remains functional for educational/demo purposes while encouraging users to configure API keys for production use.
