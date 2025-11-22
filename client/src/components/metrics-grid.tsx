@@ -63,11 +63,15 @@ function MetricCard({ label, value, tooltip, format, testId, health }: MetricCar
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="hover-elevate rounded-full" data-testid={`tooltip-${testId}`}>
-                  <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                <button 
+                  className="hover-elevate rounded-full p-1 transition-colors hover:bg-accent/30 hover:text-accent-foreground cursor-help"
+                  data-testid={`tooltip-${testId}`}
+                  aria-label={`Learn more about ${label}`}
+                >
+                  <HelpCircle className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
+              <TooltipContent className="max-w-xs text-left">
                 <div className="text-sm leading-relaxed space-y-2">
                   <p className="font-semibold text-base">{label}</p>
                   <p>{tooltip}</p>
