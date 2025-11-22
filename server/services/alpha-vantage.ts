@@ -1,11 +1,11 @@
 import axios from "axios";
 import type { StockQuote, StockMetrics, NewsItem } from "@shared/schema";
+import { getFinancialNews } from "./news";
 
-// Using Alpha Vantage free tier (rate limited to 5 calls/min, 500/day)
-const API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo"; // demo key works with limited symbols
+const API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo";
 const BASE_URL = "https://www.alphavantage.co/query";
 
-// Fallback mock data for demo - shows the system works
+// Demo data for common stocks
 const DEMO_DATA: { [key: string]: any } = {
   "AAPL": {
     quote: { 
@@ -75,7 +75,6 @@ const DEMO_DATA: { [key: string]: any } = {
 
 export async function getStockQuote(ticker: string): Promise<StockQuote> {
   try {
-    // Use demo data for common symbols to avoid rate limiting
     if (DEMO_DATA[ticker.toUpperCase()]) {
       const demoQuote = DEMO_DATA[ticker.toUpperCase()].quote;
       return {
@@ -96,7 +95,6 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
       };
     }
 
-    // Try real API for other symbols
     const res = await axios.get(BASE_URL, {
       params: {
         function: "GLOBAL_QUOTE",
@@ -108,7 +106,6 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
 
     const quote = res.data["Global Quote"];
     if (!quote || !quote["05. price"]) {
-      // Fallback to demo or error
       if (API_KEY === "demo") {
         throw new Error(`Demo API key doesn't support ${ticker}. Please set ALPHA_VANTAGE_API_KEY environment variable.`);
       }
@@ -138,7 +135,6 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
 }
 
 export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
-  // Provide demo metrics with detailed explanations
   const metricsData: { [key: string]: StockMetrics } = {
     "AAPL": {
       peRatio: 28.5,
@@ -219,7 +215,6 @@ export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
     return metricsData[upperTicker];
   }
 
-  // Generic metrics for other tickers
   return {
     peRatio: null,
     eps: null,
@@ -233,31 +228,7 @@ export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
 }
 
 export async function getStockNews(ticker: string): Promise<NewsItem[]> {
-  // Return mock news data since Alpha Vantage free tier doesn't include news
-  const mockNews: NewsItem[] = [
-    {
-      title: `${ticker} continues strong performance in market`,
-      publisher: "Financial News",
-      link: "#",
-      publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      summary: `Recent analysis shows ${ticker} maintaining positive momentum.`,
-    },
-    {
-      title: `Analyst upgrades ${ticker} price target`,
-      publisher: "Market Analysis",
-      link: "#",
-      publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      summary: `Leading market analysts provide bullish outlook on ${ticker}.`,
-    },
-    {
-      title: `${ticker} earnings beat expectations`,
-      publisher: "Business News",
-      link: "#",
-      publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      summary: `Recent quarterly results demonstrate strong financial performance.`,
-    },
-  ];
-  return mockNews;
+  return getFinancialNews(ticker, 10);
 }
 
 export async function getHistoricalPrices(
@@ -276,7 +247,6 @@ export async function getHistoricalPrices(
 
     const timeSeries = res.data["Time Series (Daily)"];
     if (!timeSeries) {
-      // Return synthetic data for demo
       const data = [];
       const basePrice = 200;
       for (let i = days; i > 0; i--) {
@@ -300,7 +270,6 @@ export async function getHistoricalPrices(
     return prices.reverse();
   } catch (error: any) {
     console.error("Alpha Vantage historical prices error:", error.message);
-    // Return synthetic data for demo
     const data = [];
     const basePrice = 200;
     for (let i = days; i > 0; i--) {
@@ -320,8 +289,6 @@ export async function getBusinessSummary(ticker: string): Promise<{
   sector: string;
   industry: string;
 }> {
-  // Alpha Vantage free tier doesn't provide business profiles
-  // Return meaningful defaults
   const summaries: { [key: string]: { summary: string; sector: string; industry: string } } = {
     "AAPL": {
       summary: "Apple Inc. is a technology company that designs, manufactures, and markets smartphones, personal computers, and software.",
