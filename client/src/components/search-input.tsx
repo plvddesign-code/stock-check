@@ -109,13 +109,15 @@ export function SearchInput({ onSelect, value, onChange, onSubmit }: SearchInput
               data-testid={`button-search-result-${result.ticker}`}
             >
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-foreground">{result.ticker}</div>
-                <div className="text-sm text-foreground/70 truncate">
+                <div className="font-semibold text-foreground truncate">
                   {result.name}
-                  {result.exchange && result.exchange !== "Unknown" && (
-                    <span className="ml-2 text-foreground/50">• {result.exchange}</span>
-                  )}
+                  <span className="text-foreground/60"> ({result.ticker})</span>
                 </div>
+                {result.exchange && result.exchange !== "Unknown" && (
+                  <div className="text-sm text-foreground/50">
+                    {result.exchange}
+                  </div>
+                )}
               </div>
               <ChevronRight className="w-5 h-5 text-foreground/50 flex-shrink-0 ml-2" />
             </button>
