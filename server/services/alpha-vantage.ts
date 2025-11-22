@@ -138,8 +138,88 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
 }
 
 export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
-  // Alpha Vantage free tier doesn't provide detailed metrics
-  // Return null values - frontend will handle gracefully
+  // Provide demo metrics with detailed explanations
+  const metricsData: { [key: string]: StockMetrics } = {
+    "AAPL": {
+      peRatio: 28.5,
+      peExplanation: "Apple trades at 28.5x earnings. This is higher than the historical average of 20-25x, indicating the market expects significant future growth.",
+      eps: 6.05,
+      epsExplanation: "Each share earned $6.05 in profit. This is strong and has grown consistently year-over-year.",
+      beta: 1.2,
+      betaExplanation: "Apple's stock is 20% more volatile than the overall market. When the market goes up 10%, Apple typically goes up 12%.",
+      dividendYield: 0.004,
+      dividendExplanation: "Apple returns 0.4% of the stock price as dividends annually. This is modest as Apple focuses on buybacks instead.",
+      profitMargin: 0.28,
+      marginExplanation: "Apple keeps 28 cents of every dollar of sales as profit. This is exceptional - most tech companies average 15-20%.",
+      debtToEquity: 1.2,
+      debtExplanation: "Apple has $1.20 of debt for every $1 of equity. This is moderate and manageable given their strong cash generation.",
+      returnOnEquity: 0.85,
+      roeExplanation: "Apple generates 85% returns on shareholder investments annually. This is excellent - most healthy companies average 15-20%.",
+      revenueGrowth: 0.08,
+      revenueExplanation: "Revenue grew 8% year-over-year. Solid growth for a company of Apple's size, though slower than earlier years.",
+    },
+    "GOOGL": {
+      peRatio: 26.3,
+      peExplanation: "Google trades at 26.3x earnings. This reflects the market's confidence in the company's growth prospects, particularly in AI and cloud.",
+      eps: 7.82,
+      epsExplanation: "Each share earned $7.82 in profit. Strong and consistent earnings growth demonstrates operational excellence.",
+      beta: 1.0,
+      betaExplanation: "Google moves almost exactly with the market. It's considered a defensive growth stock due to its diversified revenue streams.",
+      dividendYield: 0,
+      dividendExplanation: "Google doesn't pay dividends. Instead, it reinvests profits into R&D and AI innovation.",
+      profitMargin: 0.25,
+      marginExplanation: "Google keeps 25 cents of every sales dollar as profit. Among the highest in the tech industry.",
+      debtToEquity: 0.08,
+      debtExplanation: "Google has minimal debt - only $0.08 of debt per $1 of equity. This provides flexibility for investments and acquisitions.",
+      returnOnEquity: 0.18,
+      roeExplanation: "Google generates 18% returns on shareholder equity annually. This is above average and demonstrates efficient capital use.",
+      revenueGrowth: 0.13,
+      revenueExplanation: "Revenue grew 13% year-over-year. Strong growth, particularly driven by cloud and advertising resilience.",
+    },
+    "MSFT": {
+      peRatio: 32.8,
+      peExplanation: "Microsoft trades at 32.8x earnings - premium to market due to growth in cloud (Azure) and AI integration.",
+      eps: 11.34,
+      epsExplanation: "Each share earned $11.34 in profit. Among the highest in the industry, reflecting operational scale and efficiency.",
+      beta: 0.9,
+      betaExplanation: "Microsoft is slightly less volatile than the market (0.9). Considered defensive due to enterprise software stability.",
+      dividendYield: 0.007,
+      dividendExplanation: "Microsoft returns 0.7% through dividends and is increasing it. Shows confidence in future cash generation.",
+      profitMargin: 0.35,
+      marginExplanation: "Microsoft keeps 35 cents per sales dollar - best-in-class margins due to high-margin cloud and software business.",
+      debtToEquity: 0.5,
+      debtExplanation: "Microsoft has moderate debt. $0.50 of debt per $1 of equity is healthy and well-managed.",
+      returnOnEquity: 0.42,
+      roeExplanation: "Microsoft generates 42% returns on shareholder equity. Exceptional efficiency in using capital.",
+      revenueGrowth: 0.16,
+      revenueExplanation: "Revenue grew 16% year-over-year. Strong growth accelerated by Azure cloud adoption and AI services.",
+    },
+    "TSLA": {
+      peRatio: 68.5,
+      peExplanation: "Tesla trades at a premium 68.5x earnings. The market prices in high growth expectations for EVs and energy storage.",
+      eps: 4.15,
+      epsExplanation: "Each share earned $4.15 in profit. Tesla is highly profitable now, a major shift from growth-at-all-costs strategy.",
+      beta: 1.8,
+      betaExplanation: "Tesla is 80% more volatile than the market. A speculative growth stock with significant upside and downside potential.",
+      dividendYield: 0,
+      dividendExplanation: "Tesla doesn't pay dividends - all profits are reinvested into manufacturing capacity and R&D.",
+      profitMargin: 0.10,
+      marginExplanation: "Tesla keeps 10 cents per sales dollar. Lower than other automakers due to aggressive pricing strategy.",
+      debtToEquity: 0.32,
+      debtExplanation: "Tesla has low debt levels - $0.32 per $1 of equity. Strengthened balance sheet from consistent profitability.",
+      returnOnEquity: 0.28,
+      roeExplanation: "Tesla generates 28% returns on equity. Strong for the automotive industry, showing operational improvements.",
+      revenueGrowth: 0.26,
+      revenueExplanation: "Revenue grew 26% year-over-year. Outstanding growth driven by new factories and Cybertruck ramp-up.",
+    }
+  };
+
+  const upperTicker = ticker.toUpperCase();
+  if (metricsData[upperTicker]) {
+    return metricsData[upperTicker];
+  }
+
+  // Generic metrics for other tickers
   return {
     peRatio: null,
     eps: null,

@@ -50,15 +50,33 @@ export interface StockQuote {
   fiftyTwoWeekLow: number;
 }
 
+export interface MetricExplanation {
+  value: number | null;
+  explanation: string;
+  whatItMeans: string;
+  whyImportant: string;
+  comparison?: string;
+  relatedMetrics?: string[];
+  dataSource?: string;
+}
+
 export interface StockMetrics {
   peRatio: number | null;
+  peExplanation?: string;
   eps: number | null;
+  epsExplanation?: string;
   beta: number | null;
+  betaExplanation?: string;
   dividendYield: number | null;
+  dividendExplanation?: string;
   profitMargin: number | null;
+  marginExplanation?: string;
   debtToEquity: number | null;
+  debtExplanation?: string;
   returnOnEquity: number | null;
+  roeExplanation?: string;
   revenueGrowth: number | null;
+  revenueExplanation?: string;
 }
 
 export interface NewsItem {
@@ -69,13 +87,32 @@ export interface NewsItem {
   summary?: string;
 }
 
+export interface RiskDetail {
+  title: string;
+  description: string;
+  why: string;
+  whyNot?: string;
+  supportingData: string[];
+  sources: Array<{ type: "official" | "market" | "rumor" | "insider" | "news"; label: string; data: string }>;
+  severity: "low" | "medium" | "high";
+}
+
+export interface OpportunityDetail {
+  title: string;
+  description: string;
+  why: string;
+  supportingData: string[];
+  sources: Array<{ type: "official" | "market" | "rumor" | "insider" | "news"; label: string; data: string }>;
+  potential: "low" | "medium" | "high";
+}
+
 export interface AIAnalysis {
   summary: string;
   recommendation: "BUY" | "HOLD" | "SELL";
   confidence: number;
   reasoning: string;
-  risks: string[];
-  opportunities: string[];
+  risks: string[] | RiskDetail[];
+  opportunities: string[] | OpportunityDetail[];
   financialHealthScore: number;
   sentimentScore: number;
 }

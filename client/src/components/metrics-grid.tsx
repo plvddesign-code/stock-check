@@ -35,7 +35,15 @@ function MetricCard({ label, value, tooltip, format, testId }: MetricCardProps) 
                 </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="text-sm leading-relaxed">{tooltip}</p>
+                <div className="text-sm leading-relaxed space-y-2">
+                  <p className="font-semibold text-base">{label}</p>
+                  <p>{tooltip}</p>
+                  {displayValue !== "N/A" && (
+                    <p className="text-xs pt-2 border-t border-muted">
+                      Current value: {displayValue}
+                    </p>
+                  )}
+                </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -54,53 +62,53 @@ export function MetricsGrid({ metrics }: MetricsGridProps) {
       <MetricCard
         label="P/E Ratio"
         value={metrics.peRatio}
-        tooltip="Price-to-Earnings ratio shows how much investors pay for each dollar of earnings. Lower values may indicate better value, but context matters."
+        tooltip={metrics.peExplanation || "Price-to-Earnings ratio shows how much investors pay for each dollar of earnings. Lower values may indicate better value, but context matters."}
         testId="pe-ratio"
       />
       <MetricCard
         label="EPS"
         value={metrics.eps}
-        tooltip="Earnings Per Share indicates how much profit the company makes per share. Higher is generally better."
+        tooltip={metrics.epsExplanation || "Earnings Per Share indicates how much profit the company makes per share. Higher is generally better."}
         format={(val) => `$${val.toFixed(2)}`}
         testId="eps"
       />
       <MetricCard
         label="Beta"
         value={metrics.beta}
-        tooltip="Beta measures stock volatility compared to the market. Above 1 means more volatile, below 1 means less volatile than the market."
+        tooltip={metrics.betaExplanation || "Beta measures stock volatility compared to the market. Above 1 means more volatile, below 1 means less volatile than the market."}
         testId="beta"
       />
       <MetricCard
         label="Dividend Yield"
         value={metrics.dividendYield}
-        tooltip="Dividend Yield shows the annual dividend payment as a percentage of the stock price. Higher yields can indicate steady income potential."
+        tooltip={metrics.dividendExplanation || "Dividend Yield shows the annual dividend payment as a percentage of the stock price. Higher yields can indicate steady income potential."}
         format={(val) => `${(val * 100).toFixed(2)}%`}
         testId="dividend-yield"
       />
       <MetricCard
         label="Profit Margin"
         value={metrics.profitMargin}
-        tooltip="Profit Margin shows what percentage of revenue becomes profit. Higher margins indicate better efficiency."
+        tooltip={metrics.marginExplanation || "Profit Margin shows what percentage of revenue becomes profit. Higher margins indicate better efficiency."}
         format={(val) => `${(val * 100).toFixed(2)}%`}
         testId="profit-margin"
       />
       <MetricCard
         label="Debt/Equity"
         value={metrics.debtToEquity}
-        tooltip="Debt-to-Equity ratio measures financial leverage. Lower values generally indicate less risk from debt."
+        tooltip={metrics.debtExplanation || "Debt-to-Equity ratio measures financial leverage. Lower values generally indicate less risk from debt."}
         testId="debt-equity"
       />
       <MetricCard
         label="ROE"
         value={metrics.returnOnEquity}
-        tooltip="Return on Equity shows how efficiently the company uses shareholder investments to generate profit. Higher is better."
+        tooltip={metrics.roeExplanation || "Return on Equity shows how efficiently the company uses shareholder investments to generate profit. Higher is better."}
         format={(val) => `${(val * 100).toFixed(2)}%`}
         testId="roe"
       />
       <MetricCard
         label="Revenue Growth"
         value={metrics.revenueGrowth}
-        tooltip="Revenue Growth shows the year-over-year increase in sales. Positive growth indicates expanding business."
+        tooltip={metrics.revenueExplanation || "Revenue Growth shows the year-over-year increase in sales. Positive growth indicates expanding business."}
         format={(val) => `${(val * 100).toFixed(2)}%`}
         testId="revenue-growth"
       />
