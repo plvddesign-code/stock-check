@@ -36,7 +36,9 @@ export default function Home() {
 
       {/* Content with semi-transparent dark overlay for accessibility */}
       <div className="relative z-10">
-        <header className="border-b bg-background/80 backdrop-blur-sm">
+        <header className="border-b bg-background/80 backdrop-blur-sm" style={{
+          background: "linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 50%, rgba(240, 147, 251, 0.1) 100%)"
+        }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-6 h-6 text-primary" data-testid="icon-logo" />
@@ -71,7 +73,7 @@ export default function Home() {
             </div>
 
             <form onSubmit={handleSearch} className="flex gap-3">
-              <div className="relative flex-[0.7]">
+              <div className="relative flex-[0.8]">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
                 <Input
                   type="text"
@@ -86,7 +88,10 @@ export default function Home() {
               <Button
                 type="submit"
                 size="lg"
-                className="flex-[0.3] h-14 text-base font-semibold"
+                className="flex-[0.2] h-14 text-base font-semibold text-white"
+                style={{
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)"
+                }}
                 data-testid="button-analyze"
               >
                 Analyze Stock
