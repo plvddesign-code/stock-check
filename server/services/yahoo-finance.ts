@@ -251,35 +251,71 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
 }
 
 export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
-  const quote = await yahooFinance.quote(ticker);
+  try {
+    // Get basic metrics from quote
+    const quote = await yahooFinance.quote(ticker);
 
-  const peRatio = quote.trailingPE || null;
-  const eps = quote.epsTrailingTwelveMonths || null;
-  const beta = quote.beta || null;
-  const dividendYield = quote.dividendYield || null;
-  const profitMargin = quote.profitMargins || null;
-  const debtToEquity = quote.debtToEquity || null;
-  const returnOnEquity = quote.returnOnEquity || null;
-  const revenueGrowth = quote.revenueGrowth || null;
+    // Get detailed financial metrics from quoteSummary
+    let financialData: any = {};
+    let keyStats: any = {};
+    try {
+      const summary = await yahooFinance.quoteSummary(ticker, {
+        modules: "financialData"
+      });
+      
+      if (summary.financialData) {
+        financialData = summary.financialData;
+      }
+    } catch (e) {
+      console.warn(`Could not fetch financialData for ${ticker}:`, e);
+    }
 
-  return {
-    peRatio,
-    peHealth: calculateMetricHealth("peRatio", peRatio),
-    eps,
-    epsHealth: calculateMetricHealth("eps", eps),
-    beta,
-    betaHealth: calculateMetricHealth("beta", beta),
-    dividendYield,
-    dividendHealth: calculateMetricHealth("dividendYield", dividendYield),
-    profitMargin,
-    marginHealth: calculateMetricHealth("profitMargin", profitMargin),
-    debtToEquity,
-    debtHealth: calculateMetricHealth("debtToEquity", debtToEquity),
-    returnOnEquity,
-    roeHealth: calculateMetricHealth("returnOnEquity", returnOnEquity),
-    revenueGrowth,
-    growthHealth: calculateMetricHealth("revenueGrowth", revenueGrowth),
-  };
+    try {
+      const summary = await yahooFinance.quoteSummary(ticker, {
+        modules: "defaultKeyStatistics"
+      });
+      
+      if (summary.defaultKeyStatistics) {
+        keyStats = summary.defaultKeyStatistics;
+      }
+    } catch (e) {
+      console.warn(`Could not fetch defaultKeyStatistics for ${ticker}:`, e);
+    }
+
+    // Extract metrics from both sources - prefer detailed financial data
+    const peRatio = keyStats?.trailingPE || quote.trailingPE || null;
+    const eps = keyStats?.trailingEps || quote.epsTrailingTwelveMonths || null;
+    const beta = keyStats?.beta || quote.beta || null;
+    const dividendYield = quote.dividendYield || null;
+    const profitMargin = financialData?.profitMargins || null;
+    const debtToEquity = financialData?.debtToEquity || null;
+    const returnOnEquity = financialData?.returnOnEquity || null;
+    const revenueGrowth = financialData?.revenueGrowth || null;
+
+    console.log(`[${ticker}] Real metrics - P/E: ${peRatio}, EPS: ${eps}, Dividend: ${dividendYield}%, Beta: ${beta}, Profit Margin: ${profitMargin ? (profitMargin * 100).toFixed(1) : 'N/A'}%, D/E: ${debtToEquity}, ROE: ${returnOnEquity}`);
+
+    return {
+      peRatio,
+      peHealth: calculateMetricHealth("peRatio", peRatio),
+      eps,
+      epsHealth: calculateMetricHealth("eps", eps),
+      beta,
+      betaHealth: calculateMetricHealth("beta", beta),
+      dividendYield,
+      dividendHealth: calculateMetricHealth("dividendYield", dividendYield),
+      profitMargin,
+      marginHealth: calculateMetricHealth("profitMargin", profitMargin),
+      debtToEquity,
+      debtHealth: calculateMetricHealth("debtToEquity", debtToEquity),
+      returnOnEquity,
+      roeHealth: calculateMetricHealth("returnOnEquity", returnOnEquity),
+      revenueGrowth,
+      growthHealth: calculateMetricHealth("revenueGrowth", revenueGrowth),
+    };
+  } catch (error) {
+    console.error(`Error fetching metrics for ${ticker}:`, error);
+    throw error;
+  }
 }
 
 export async function getStockNews(ticker: string): Promise<NewsItem[]> {

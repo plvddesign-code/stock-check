@@ -91,19 +91,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Synthesize risk data from news, sentiment, and analyst ratings
-      const synthesizedRisk = await synthesizeRiskData(upperTicker, news, quote.currentPrice);
+      let synthesizedRisk: any = null;
+      try {
+        synthesizedRisk = await synthesizeRiskData(upperTicker, news, quote.currentPrice);
+      } catch (e) {
+        console.warn(`Risk synthesis failed for ${upperTicker}, continuing without risk data...`);
+      }
 
-      const aiAnalysis = await generateStockAnalysis(
-        upperTicker,
-        quote,
-        metrics,
-        news,
-        businessInfo.businessSummary,
-        synthesizedRisk
-      );
+      // Generate AI analysis, but gracefully degrade if it fails
+      let aiAnalysis: any = null;
+      try {
+        aiAnalysis = await generateStockAnalysis(
+          upperTicker,
+          quote,
+          metrics,
+          news,
+          businessInfo.businessSummary,
+          synthesizedRisk
+        );
+      } catch (e) {
+        console.warn(`AI analysis failed for ${upperTicker}, continuing without analysis...`);
+      }
 
-      // Generate simplified news-based risk summary with full context
-      const newsRiskSummary = await generateNewsBasedRiskSummary(upperTicker, news, quote, metrics);
+      // Generate simplified news-based risk summary, but gracefully degrade if it fails
+      let newsRiskSummary: any = null;
+      try {
+        newsRiskSummary = await generateNewsBasedRiskSummary(upperTicker, news, quote, metrics);
+      } catch (e) {
+        console.warn(`News risk summary failed for ${upperTicker}, continuing without summary...`);
+      }
 
       const response: StockAnalysisResponse = {
         quote,

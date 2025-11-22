@@ -96,7 +96,7 @@ export default function StockAnalysis() {
           <div className="space-y-12">
             <StockHeader quote={data.quote} />
             
-            <AISummaryCard analysis={data.aiAnalysis} />
+            {data.aiAnalysis && <AISummaryCard analysis={data.aiAnalysis} />}
             
             <div className="space-y-6">
               <div className="flex items-center gap-2">
