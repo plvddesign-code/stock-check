@@ -1,7 +1,206 @@
 import axios from "axios";
-import type { StockQuote, StockMetrics, NewsItem } from "@shared/schema";
+import type { StockQuote, StockMetrics, NewsItem, MetricHealth } from "@shared/schema";
 import { getFinancialNews } from "./news";
 import { getMetricsFromOfficialReports, validateMetricsRecency } from "./financial-reports";
+
+/**
+ * Calculate health status for a metric based on value and thresholds
+ */
+function calculateMetricHealth(metricName: string, value: number | null): MetricHealth {
+  if (value === null || value === undefined) {
+    return {
+      status: "unknown",
+      statusColor: "gray",
+      explanation: "Data not available",
+      quarterYear: "N/A"
+    };
+  }
+
+  switch (metricName) {
+    case "peRatio":
+      if (value < 15) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Trading below market average - potential undervalued opportunity",
+        quarterYear: "Q3 2025"
+      };
+      if (value < 25) return {
+        status: "good", statusColor: "blue",
+        explanation: "Fair valuation - in line with growth expectations",
+        quarterYear: "Q3 2025"
+      };
+      if (value < 35) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Above average valuation - higher growth expectations priced in",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "Trading at premium - vulnerable to growth disappointment",
+        quarterYear: "Q3 2025"
+      };
+
+    case "eps":
+      if (value > 5) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Strong earnings per share - healthy profitability",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 2) return {
+        status: "good", statusColor: "blue",
+        explanation: "Solid earnings - company is profitable",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Modest earnings - company barely profitable",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "Negative or very low earnings - company losing money",
+        quarterYear: "Q3 2025"
+      };
+
+    case "beta":
+      if (value < 0.8) return {
+        status: "good", statusColor: "green",
+        explanation: "Low volatility - stable, defensive stock",
+        quarterYear: "Current"
+      };
+      if (value < 1.2) return {
+        status: "good", statusColor: "blue",
+        explanation: "Market-like volatility - moves with the overall market",
+        quarterYear: "Current"
+      };
+      if (value < 1.5) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Above-market volatility - expect larger price swings",
+        quarterYear: "Current"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "High volatility - speculative stock with significant risk",
+        quarterYear: "Current"
+      };
+
+    case "dividendYield":
+      if (value >= 0.05) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Excellent dividend yield - strong income potential",
+        quarterYear: "Q3 2025"
+      };
+      if (value >= 0.02) return {
+        status: "good", statusColor: "blue",
+        explanation: "Healthy dividend yield - solid income stream",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Modest dividend - company reinvests most profits",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "No dividend - all profits reinvested or retained",
+        quarterYear: "Q3 2025"
+      };
+
+    case "profitMargin":
+      if (value > 0.25) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Exceptional margins - best-in-class profitability",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0.15) return {
+        status: "good", statusColor: "blue",
+        explanation: "Healthy margins - strong pricing power",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0.05) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Thin margins - vulnerable to cost increases",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "Very thin margins - little room for error",
+        quarterYear: "Q3 2025"
+      };
+
+    case "debtToEquity":
+      if (value < 0.5) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Low leverage - minimal financial risk",
+        quarterYear: "Q3 2025"
+      };
+      if (value < 1.5) return {
+        status: "good", statusColor: "blue",
+        explanation: "Moderate debt - manageable obligations",
+        quarterYear: "Q3 2025"
+      };
+      if (value < 2.5) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "High leverage - significant debt burden",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "Excessive leverage - over-leveraged balance sheet",
+        quarterYear: "Q3 2025"
+      };
+
+    case "returnOnEquity":
+      if (value > 0.20) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Exceptional ROE - outstanding capital efficiency",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0.15) return {
+        status: "good", statusColor: "blue",
+        explanation: "Strong ROE - efficient capital deployment",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0.10) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Adequate ROE - meets market average",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "Poor ROE - inefficient capital use",
+        quarterYear: "Q3 2025"
+      };
+
+    case "revenueGrowth":
+      if (value > 0.20) return {
+        status: "excellent", statusColor: "green",
+        explanation: "Strong growth - rapidly expanding business",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0.10) return {
+        status: "good", statusColor: "blue",
+        explanation: "Solid growth - healthy expansion",
+        quarterYear: "Q3 2025"
+      };
+      if (value > 0.05) return {
+        status: "fair", statusColor: "yellow",
+        explanation: "Modest growth - maturing company",
+        quarterYear: "Q3 2025"
+      };
+      return {
+        status: "concerning", statusColor: "red",
+        explanation: "Negative growth - company declining",
+        quarterYear: "Q3 2025"
+      };
+
+    default:
+      return {
+        status: "unknown", statusColor: "gray",
+        explanation: "Unable to assess metric",
+        quarterYear: "N/A"
+      };
+  }
+}
 
 const API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo";
 const BASE_URL = "https://www.alphavantage.co/query";
@@ -227,11 +426,7 @@ export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
   };
 
   const upperTicker = ticker.toUpperCase();
-  if (metricsData[upperTicker]) {
-    return metricsData[upperTicker];
-  }
-
-  return {
+  const baseMetrics = metricsData[upperTicker] || {
     peRatio: null,
     eps: null,
     beta: null,
@@ -240,6 +435,19 @@ export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
     debtToEquity: null,
     returnOnEquity: null,
     revenueGrowth: null,
+  };
+
+  // Add health status to each metric
+  return {
+    ...baseMetrics,
+    peHealth: calculateMetricHealth("peRatio", baseMetrics.peRatio),
+    epsHealth: calculateMetricHealth("eps", baseMetrics.eps),
+    betaHealth: calculateMetricHealth("beta", baseMetrics.beta),
+    dividendHealth: calculateMetricHealth("dividendYield", baseMetrics.dividendYield),
+    marginHealth: calculateMetricHealth("profitMargin", baseMetrics.profitMargin),
+    debtHealth: calculateMetricHealth("debtToEquity", baseMetrics.debtToEquity),
+    roeHealth: calculateMetricHealth("returnOnEquity", baseMetrics.returnOnEquity),
+    growthHealth: calculateMetricHealth("revenueGrowth", baseMetrics.revenueGrowth),
   };
 }
 

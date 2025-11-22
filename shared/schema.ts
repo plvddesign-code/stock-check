@@ -60,23 +60,39 @@ export interface MetricExplanation {
   dataSource?: string;
 }
 
+export interface MetricHealth {
+  status: "excellent" | "good" | "fair" | "concerning" | "unknown";
+  statusColor: "green" | "blue" | "yellow" | "red" | "gray";
+  explanation: string;
+  dataSource?: string;
+  quarterYear?: string;
+}
+
 export interface StockMetrics {
   peRatio: number | null;
   peExplanation?: string;
+  peHealth?: MetricHealth;
   eps: number | null;
   epsExplanation?: string;
+  epsHealth?: MetricHealth;
   beta: number | null;
   betaExplanation?: string;
+  betaHealth?: MetricHealth;
   dividendYield: number | null;
   dividendExplanation?: string;
+  dividendHealth?: MetricHealth;
   profitMargin: number | null;
   marginExplanation?: string;
+  marginHealth?: MetricHealth;
   debtToEquity: number | null;
   debtExplanation?: string;
+  debtHealth?: MetricHealth;
   returnOnEquity: number | null;
   roeExplanation?: string;
+  roeHealth?: MetricHealth;
   revenueGrowth: number | null;
   revenueExplanation?: string;
+  growthHealth?: MetricHealth;
 }
 
 export interface NewsItem {
