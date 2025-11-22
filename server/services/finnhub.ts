@@ -7,6 +7,17 @@ const BASE_URL = "https://finnhub.io/api/v1";
 // Fallback to a public/demo key if needed
 const FINNHUB_KEY = process.env.FINNHUB_API_KEY || API_KEY;
 
+export interface SynthesizedRiskData {
+  newsSentiment: {
+    recentCount: number;
+    newsHeadlines: string[];
+    sentimentTone: "positive" | "negative" | "neutral";
+  };
+  riskFactors: string[];
+  catalysts: string[];
+  confidence: number;
+}
+
 export async function getStockQuote(ticker: string): Promise<StockQuote> {
   try {
     const [quoteRes, profileRes] = await Promise.all([
@@ -156,4 +167,64 @@ export async function getBusinessSummary(ticker: string): Promise<{
       industry: "Unknown",
     };
   }
+}
+
+/**
+ * Synthesize risk data from latest news, analyst sentiment, and company events
+ */
+export async function synthesizeRiskData(
+  ticker: string,
+  news: NewsItem[]
+): Promise<SynthesizedRiskData> {
+  // Analyze news sentiment
+  const recentNews = news.slice(0, 5);
+  const newsHeadlines = recentNews.map((n) => n.title);
+
+  // Simple sentiment analysis based on keywords
+  let positiveCount = 0;
+  let negativeCount = 0;
+
+  recentNews.forEach((item) => {
+    const titleLower = (item.title + (item.summary || "")).toLowerCase();
+    const positiveKeywords = ["beat", "surge", "strong", "growth", "profit", "upgrade"];
+    const negativeKeywords = ["decline", "miss", "loss", "risk", "warning", "downgrade"];
+
+    positiveKeywords.forEach((kw) => {
+      if (titleLower.includes(kw)) positiveCount++;
+    });
+    negativeKeywords.forEach((kw) => {
+      if (titleLower.includes(kw)) negativeCount++;
+    });
+  });
+
+  const sentimentTone: "positive" | "negative" | "neutral" =
+    positiveCount > negativeCount ? "positive" : negativeCount > positiveCount ? "negative" : "neutral";
+
+  // Identify risk factors from news
+  const riskFactors: string[] = [];
+  if (negativeCount > 0) {
+    riskFactors.push(`Recent news shows ${negativeCount} negative headlines with potential downside risks`);
+  }
+
+  // Identify catalysts from news
+  const catalysts: string[] = [];
+  const upcomingKeywords = ["earnings", "launch", "acquisition", "product", "expansion"];
+  recentNews.forEach((item) => {
+    upcomingKeywords.forEach((kw) => {
+      if (item.title.toLowerCase().includes(kw)) {
+        catalysts.push(item.title);
+      }
+    });
+  });
+
+  return {
+    newsSentiment: {
+      recentCount: recentNews.length,
+      newsHeadlines,
+      sentimentTone,
+    },
+    riskFactors: riskFactors.slice(0, 3),
+    catalysts: catalysts.slice(0, 2),
+    confidence: recentNews.length > 0 ? 0.7 : 0.3,
+  };
 }

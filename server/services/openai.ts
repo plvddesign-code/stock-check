@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { StockQuote, StockMetrics, NewsItem, AIAnalysis } from "@shared/schema";
 import { enrichMetrics, generateRiskNarrative, type EnrichedMetrics } from "./financial-metrics";
+import type { SynthesizedRiskData } from "./finnhub";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = process.env.OPENAI_API_KEY 
@@ -12,7 +13,8 @@ export async function generateStockAnalysis(
   quote: StockQuote,
   metrics: StockMetrics,
   news: NewsItem[],
-  businessSummary: string
+  businessSummary: string,
+  synthesizedRiskData?: SynthesizedRiskData
 ): Promise<AIAnalysis> {
   if (!openai) {
     console.warn("OpenAI API key not configured - using fallback analysis");
@@ -49,6 +51,13 @@ RISK ASSESSMENT:
 - Overall Risk Score: ${enriched.overallRiskScore}/10 (${enriched.riskProfile} profile)
 - Key Risks: ${riskNarrative.keyRisks.slice(0, 3).join('; ') || 'None identified'}
 - Key Opportunities: ${riskNarrative.keyOpportunities.slice(0, 3).join('; ') || 'Standard growth prospects'}
+
+NEWS & SENTIMENT ANALYSIS:
+- Recent News Count: ${synthesizedRiskData?.newsSentiment.recentCount || 0} articles
+- Sentiment Tone: ${synthesizedRiskData?.newsSentiment.sentimentTone || 'neutral'}
+- News Headlines: ${synthesizedRiskData?.newsSentiment.newsHeadlines.slice(0, 3).join('; ') || 'No recent news'}
+- Identified Risks: ${synthesizedRiskData?.riskFactors.slice(0, 2).join('; ') || 'None from news'}
+- Catalysts: ${synthesizedRiskData?.catalysts.slice(0, 2).join('; ') || 'Standard operational execution'}
 
 BUSINESS: ${businessSummary}
 

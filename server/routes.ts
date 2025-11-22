@@ -11,6 +11,7 @@ import {
   getBusinessSummary 
 } from "./services/alpha-vantage";
 import { generateStockAnalysis } from "./services/openai";
+import { synthesizeRiskData } from "./services/finnhub";
 import type { StockAnalysisResponse } from "@shared/schema";
 import { insertWatchlistSchema } from "@shared/schema";
 
@@ -51,12 +52,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Synthesize risk data from news and sentiment
+      const synthesizedRisk = await synthesizeRiskData(upperTicker, news);
+
       const aiAnalysis = await generateStockAnalysis(
         upperTicker,
         quote,
         metrics,
         news,
-        businessInfo.businessSummary
+        businessInfo.businessSummary,
+        synthesizedRisk
       );
 
       const response: StockAnalysisResponse = {
