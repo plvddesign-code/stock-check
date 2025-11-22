@@ -98,8 +98,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         synthesizedRisk
       );
 
-      // Generate simplified news-based risk summary
-      const newsRiskSummary = await generateNewsBasedRiskSummary(upperTicker, news);
+      // Generate simplified news-based risk summary with full context
+      const newsRiskSummary = await generateNewsBasedRiskSummary(upperTicker, news, quote, metrics);
 
       const response: StockAnalysisResponse = {
         quote,

@@ -186,7 +186,9 @@ Use real-time analyst ratings, news sentiment scores, and price targets as core 
 
 export async function generateNewsBasedRiskSummary(
   ticker: string,
-  news: NewsItem[]
+  news: NewsItem[],
+  quote: StockQuote,
+  metrics: StockMetrics
 ): Promise<{ risks: string[]; opportunities: string[] }> {
   if (!openai || news.length === 0) {
     return { risks: [], opportunities: [] };
@@ -194,26 +196,38 @@ export async function generateNewsBasedRiskSummary(
 
   try {
     const newsText = news.slice(0, 5).map(n => `- ${n.title}: ${n.summary || n.title}`).join('\n');
+    const priceChange = quote.changePercent >= 0 ? `+${quote.changePercent.toFixed(2)}%` : `${quote.changePercent.toFixed(2)}%`;
+    
+    const prompt = `You are a financial analyst. Analyze ${ticker} (${quote.companyName}) based on recent news and current metrics.
 
-    const prompt = `Analyze the following recent news about ${ticker} and identify 2-3 KEY RISKS and 2-3 KEY OPPORTUNITIES in simple, plain language. Be concise and specific.
+CURRENT STOCK DATA:
+- Price: $${quote.currentPrice.toFixed(2)} (${priceChange} today)
+- 52-week Range: $${quote.fiftyTwoWeekLow.toFixed(2)} - $${quote.fiftyTwoWeekHigh.toFixed(2)}
+- P/E Ratio: ${metrics.peRatio ? metrics.peRatio.toFixed(2) : 'N/A'}
+- Profit Margin: ${metrics.profitMargin ? (metrics.profitMargin * 100).toFixed(1) : 'N/A'}%
+- Debt/Equity: ${metrics.debtToEquity ? metrics.debtToEquity.toFixed(2) : 'N/A'}
 
 RECENT NEWS:
 ${newsText}
 
-Provide response as JSON with two arrays:
+Based on this news and the current stock metrics, identify the 2-3 most SPECIFIC, ACTIONABLE risks and 2-3 most SPECIFIC, ACTIONABLE opportunities for ${ticker}. 
+
+IMPORTANT: Make your recommendations specific to ${ticker}'s current situation. Reference actual news headlines or metrics where relevant. Be concrete, not generic.
+
+Provide JSON response:
 {
-  "risks": ["Risk 1 - brief explanation", "Risk 2 - brief explanation"],
-  "opportunities": ["Opportunity 1 - brief explanation", "Opportunity 2 - brief explanation"]
+  "risks": ["Specific Risk 1 - explain how this directly impacts ${ticker}", "Specific Risk 2..."],
+  "opportunities": ["Specific Opportunity 1 - explain how ${ticker} could benefit", "Specific Opportunity 2..."]
 }
 
-Focus on what the news actually says. Each item should be 1-2 sentences max.`;
+Each item should be 1-2 sentences. Focus on what makes this unique to ${ticker}, not general stock advice.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5",
       messages: [
         {
           role: "system",
-          content: "You are a financial analyst who identifies key risks and opportunities from news articles in simple language."
+          content: "You are a financial analyst who provides specific, actionable insights tied to real company data and news events. Avoid generic advice. Always reference specific metrics, news headlines, or company circumstances."
         },
         {
           role: "user",
@@ -221,13 +235,13 @@ Focus on what the news actually says. Each item should be 1-2 sentences max.`;
         }
       ],
       response_format: { type: "json_object" },
-      max_completion_tokens: 500,
+      max_completion_tokens: 800,
     });
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
     return {
-      risks: Array.isArray(result.risks) ? result.risks.slice(0, 3) : [],
-      opportunities: Array.isArray(result.opportunities) ? result.opportunities.slice(0, 3) : []
+      risks: Array.isArray(result.risks) ? result.risks.filter((r: any) => r && typeof r === 'string').slice(0, 3) : [],
+      opportunities: Array.isArray(result.opportunities) ? result.opportunities.filter((o: any) => o && typeof o === 'string').slice(0, 3) : []
     };
   } catch (error) {
     console.warn("News analysis error:", error);
