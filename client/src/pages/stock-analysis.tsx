@@ -65,7 +65,7 @@ export default function StockAnalysis() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur z-10">
+      <header className="border-b sticky top-0 glass backdrop-blur-md z-10">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center gap-4">
           <Button 
             variant="ghost" 
@@ -75,7 +75,7 @@ export default function StockAnalysis() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-lg font-semibold font-mono">StockSense</h1>
+          <h1 className="text-lg font-semibold font-mono gradient-text">StockSense</h1>
         </div>
       </header>
 

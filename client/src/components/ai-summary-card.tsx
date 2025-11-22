@@ -32,14 +32,14 @@ export function AISummaryCard({ analysis }: AISummaryCardProps) {
   };
 
   return (
-    <Card className="border-2 shadow-lg">
+    <Card className="border-2 shadow-xl glass backdrop-blur-md">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary" data-testid="icon-ai" />
+            <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" data-testid="icon-ai" />
             </div>
-            <CardTitle className="text-2xl">AI Analysis</CardTitle>
+            <CardTitle className="text-2xl gradient-text">AI Analysis</CardTitle>
           </div>
           <Badge 
             className={`${getRecommendationColor(analysis.recommendation)} flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold no-default-hover-elevate no-default-active-elevate`}
