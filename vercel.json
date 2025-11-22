@@ -1,25 +1,5 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "public": false,
-  "builds": [
-    {
-      "src": "dist/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "dist/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "dist/index.js"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "devCommand": "npm run dev"
 }
