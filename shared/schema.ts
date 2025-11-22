@@ -138,6 +138,7 @@ export interface StockAnalysisResponse {
   metrics: StockMetrics;
   news: NewsItem[];
   aiAnalysis: AIAnalysis;
+  newsRiskSummary?: { risks: string[]; opportunities: string[] };
   businessSummary: string;
   sector: string;
   industry: string;

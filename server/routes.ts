@@ -18,7 +18,7 @@ import {
   getStockMetrics as getAlphaMetrics,
   getBusinessSummary 
 } from "./services/alpha-vantage";
-import { generateStockAnalysis } from "./services/openai";
+import { generateStockAnalysis, generateNewsBasedRiskSummary } from "./services/openai";
 import { synthesizeRiskData } from "./services/finnhub";
 import type { StockAnalysisResponse } from "@shared/schema";
 import { insertWatchlistSchema } from "@shared/schema";
@@ -98,11 +98,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         synthesizedRisk
       );
 
+      // Generate simplified news-based risk summary
+      const newsRiskSummary = await generateNewsBasedRiskSummary(upperTicker, news);
+
       const response: StockAnalysisResponse = {
         quote,
         metrics,
         news,
         aiAnalysis,
+        newsRiskSummary,
         businessSummary: businessInfo.businessSummary,
         sector: businessInfo.sector,
         industry: businessInfo.industry,

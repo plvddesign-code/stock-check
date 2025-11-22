@@ -13,7 +13,7 @@ import { AISummaryCard } from "@/components/ai-summary-card";
 import { MetricsGrid } from "@/components/metrics-grid";
 import { PriceChart } from "@/components/price-chart";
 import { NewsList } from "@/components/news-list";
-import { RiskAssessment } from "@/components/risk-assessment";
+import { NewsRiskSummary } from "@/components/news-risk-summary";
 
 export default function StockAnalysis() {
   const [expandedSummary, setExpandedSummary] = useState(false);
@@ -157,13 +157,15 @@ export default function StockAnalysis() {
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-primary" />
-                <h2 className="text-2xl font-semibold">Risk Assessment</h2>
+            {data.newsRiskSummary && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-semibold">Risk & Opportunity Analysis</h2>
+                <NewsRiskSummary 
+                  risks={data.newsRiskSummary.risks}
+                  opportunities={data.newsRiskSummary.opportunities}
+                />
               </div>
-              <RiskAssessment analysis={data.aiAnalysis} />
-            </div>
+            )}
 
             <div className="space-y-6">
               <div className="flex items-center gap-2">

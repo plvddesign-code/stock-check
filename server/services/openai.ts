@@ -184,6 +184,57 @@ Use real-time analyst ratings, news sentiment scores, and price targets as core 
   }
 }
 
+export async function generateNewsBasedRiskSummary(
+  ticker: string,
+  news: NewsItem[]
+): Promise<{ risks: string[]; opportunities: string[] }> {
+  if (!openai || news.length === 0) {
+    return { risks: [], opportunities: [] };
+  }
+
+  try {
+    const newsText = news.slice(0, 5).map(n => `- ${n.title}: ${n.summary || n.title}`).join('\n');
+
+    const prompt = `Analyze the following recent news about ${ticker} and identify 2-3 KEY RISKS and 2-3 KEY OPPORTUNITIES in simple, plain language. Be concise and specific.
+
+RECENT NEWS:
+${newsText}
+
+Provide response as JSON with two arrays:
+{
+  "risks": ["Risk 1 - brief explanation", "Risk 2 - brief explanation"],
+  "opportunities": ["Opportunity 1 - brief explanation", "Opportunity 2 - brief explanation"]
+}
+
+Focus on what the news actually says. Each item should be 1-2 sentences max.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-5",
+      messages: [
+        {
+          role: "system",
+          content: "You are a financial analyst who identifies key risks and opportunities from news articles in simple language."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_completion_tokens: 500,
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    return {
+      risks: Array.isArray(result.risks) ? result.risks.slice(0, 3) : [],
+      opportunities: Array.isArray(result.opportunities) ? result.opportunities.slice(0, 3) : []
+    };
+  } catch (error) {
+    console.warn("News analysis error:", error);
+    return { risks: [], opportunities: [] };
+  }
+}
+
 function createFallbackAnalysis(
   ticker: string,
   quote: StockQuote,
