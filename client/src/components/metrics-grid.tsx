@@ -134,7 +134,7 @@ export function MetricsGrid({ metrics }: MetricsGridProps) {
         label="Dividend Yield"
         value={metrics.dividendYield}
         tooltip={metrics.dividendExplanation || "Dividend Yield shows annual dividend as % of price. Good: 2-5%, Excellent: >5%, Concerning: Suspended or unstable."}
-        format={(val) => `${(val * 100).toFixed(2)}%`}
+        format={(val) => `${val.toFixed(2)}%`}
         health={metrics.dividendHealth}
         testId="dividend-yield"
       />
