@@ -9,7 +9,7 @@ import {
   getStockNews, 
   getHistoricalPrices,
   getBusinessSummary 
-} from "./services/yahoo-finance";
+} from "./services/alpha-vantage";
 import { generateStockAnalysis } from "./services/openai";
 import type { StockAnalysisResponse } from "@shared/schema";
 import { insertWatchlistSchema } from "@shared/schema";
