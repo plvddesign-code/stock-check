@@ -10,9 +10,9 @@ export function NewsList({ news }: NewsListProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     
-    // Format as DD MM YYYY HH:MM
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    // Format as "22 November 2025 • 14:30"
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'long' });
     const year = date.getFullYear();
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
