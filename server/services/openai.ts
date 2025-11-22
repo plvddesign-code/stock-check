@@ -52,11 +52,14 @@ RISK ASSESSMENT:
 - Key Risks: ${riskNarrative.keyRisks.slice(0, 3).join('; ') || 'None identified'}
 - Key Opportunities: ${riskNarrative.keyOpportunities.slice(0, 3).join('; ') || 'Standard growth prospects'}
 
-NEWS & SENTIMENT ANALYSIS:
+REAL-TIME NEWS & SENTIMENT ANALYSIS:
 - Recent News Count: ${synthesizedRiskData?.newsSentiment.recentCount || 0} articles
-- Sentiment Tone: ${synthesizedRiskData?.newsSentiment.sentimentTone || 'neutral'}
+- Sentiment Tone: ${synthesizedRiskData?.newsSentiment.sentimentTone || 'neutral'} (score: ${synthesizedRiskData?.newsSentiment.sentimentScore?.toFixed(2)})
 - News Headlines: ${synthesizedRiskData?.newsSentiment.newsHeadlines.slice(0, 3).join('; ') || 'No recent news'}
-- Identified Risks: ${synthesizedRiskData?.riskFactors.slice(0, 2).join('; ') || 'None from news'}
+- Analyst Rating: ${synthesizedRiskData?.analystRating?.rating?.replace('_', ' ').toUpperCase() || 'Not available'} (${synthesizedRiskData?.analystRating?.count || 0} analysts)
+${synthesizedRiskData?.analystRating?.target ? `- Price Target: $${synthesizedRiskData.analystRating.target.toFixed(2)}` : ''}
+- Identified Risks: ${synthesizedRiskData?.riskFactors.slice(0, 2).join('; ') || 'None from latest data'}
+- Price Signals: ${synthesizedRiskData?.priceSignals.slice(0, 2).join('; ') || 'Neutral price momentum'}
 - Catalysts: ${synthesizedRiskData?.catalysts.slice(0, 2).join('; ') || 'Standard operational execution'}
 
 BUSINESS: ${businessSummary}
@@ -103,16 +106,16 @@ Provide analysis in JSON format with DETAILED, DATA-BACKED reasoning:
 }
 
 IMPORTANT INSTRUCTIONS:
-1. BASE ALL RECOMMENDATIONS ON THE SPECIFIC METRICS PROVIDED
-2. Use actual numbers from the data - don't generalize
-3. For each risk/opportunity, explain the MECHANISM (e.g., "Debt/Equity of ${metrics.debtToEquity?.toFixed(2)} means $X of debt per $1 of equity, which limits financial flexibility when...")
-4. Label each source accurately: Official (earnings/filings), Market (analyst data), News (recent articles)
-5. Include BOTH "why" it matters AND "why not" (counterarguments)
-6. Confidence should reflect data quality: High confidence if metrics align, Lower if mixed signals
-7. Risk severity: HIGH if metric crosses safety threshold, MEDIUM if approaching concern, LOW if manageable
-8. Opportunity potential: HIGH if strong tailwind, MEDIUM if encouraging trend, LOW if speculative
+1. BASE ALL RECOMMENDATIONS ON SPECIFIC, REAL-TIME DATA PROVIDED
+2. Use actual numbers from analyst ratings, news sentiment, and financial metrics - don't generalize
+3. For each risk/opportunity, explain the MECHANISM with specific evidence from the data provided
+4. Label sources accurately: Official (earnings/analyst ratings), Market (sentiment/price targets), News (recent articles with actual links)
+5. Include BOTH "why" it matters AND "why not" (counterarguments) using the actual data
+6. Confidence should be HIGH if multiple data sources align, LOWER if signals are mixed
+7. Risk severity: HIGH if negative sentiment + poor metrics, MEDIUM if isolated concern, LOW if offset by positives
+8. Opportunity potential: HIGH if analyst upside + positive sentiment, MEDIUM if one factor positive, LOW if speculative
 
-Focus on DATA-BACKED specificity over generic financial advice.`;
+Use real-time analyst ratings, news sentiment scores, and price targets as core evidence. Every claim must reference actual data.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5",

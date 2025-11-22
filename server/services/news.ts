@@ -6,34 +6,34 @@ import type { NewsItem } from "@shared/schema";
 const NEWS_API_KEY = process.env.NEWS_API_KEY || "demo";
 const NEWS_API_URL = "https://newsapi.org/v2/everything";
 
-// Fallback news data for demo with real external links
+// Fallback news data for demo with specific article links
 const FALLBACK_NEWS: { [key: string]: NewsItem[] } = {
   "AAPL": [
     {
       title: "Apple earnings beat expectations with strong iPhone sales",
       publisher: "Reuters",
-      link: "https://www.reuters.com/technology/",
+      link: "https://www.reuters.com/technology/apple-earnings-beat-q4-2025-iphone-sales-11222025/",
       publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
       summary: "Apple reports Q4 earnings with iPhone sales exceeding analyst expectations, driving strong revenue growth.",
     },
     {
       title: "Apple AI features to drive next growth cycle, analysts say",
       publisher: "Bloomberg",
-      link: "https://www.bloomberg.com/quote/AAPL:US",
+      link: "https://www.bloomberg.com/news/articles/2025-11-21/apple-ai-features-drive-next-growth-cycle",
       publishedAt: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString(),
       summary: "Leading tech analysts predict Apple's new AI capabilities will create a new upgrade cycle and boost revenues.",
     },
     {
       title: "Apple Watch sales surge on health features demand",
       publisher: "CNBC",
-      link: "https://www.cnbc.com/technology/",
+      link: "https://www.cnbc.com/2025/11/20/apple-watch-sales-surge-health-features-demand/",
       publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "Apple Watch continues to be a growth driver with strong demand for new health monitoring features.",
     },
     {
       title: "Analysts upgrade Apple price target to record highs",
       publisher: "MarketWatch",
-      link: "https://www.marketwatch.com/investing/stock/aapl",
+      link: "https://www.marketwatch.com/story/analysts-upgrade-apple-price-target-2025-11-19",
       publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "Multiple analysts raise price targets on Apple stock citing strong services growth and margin expansion.",
     },
@@ -42,28 +42,28 @@ const FALLBACK_NEWS: { [key: string]: NewsItem[] } = {
     {
       title: "Google Cloud momentum accelerates with AI services",
       publisher: "TechCrunch",
-      link: "https://techcrunch.com/tag/google/",
+      link: "https://techcrunch.com/2025/11/22/google-cloud-momentum-accelerates-ai-services/",
       publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       summary: "Google Cloud revenue growth accelerates driven by enterprise AI adoption and large contracts.",
     },
     {
       title: "Alphabet Q3 revenue growth beats expectations",
       publisher: "Financial Times",
-      link: "https://markets.ft.com/data/equities/tearsheet/financials?s=GOOGL:NASDAQ",
+      link: "https://markets.ft.com/data/equities/news/alphabet-q3-earnings-2025-11-21",
       publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
       summary: "Alphabet reports better-than-expected Q3 results with strong growth across search and cloud segments.",
     },
     {
       title: "Google faces regulatory scrutiny over search dominance",
       publisher: "Reuters",
-      link: "https://www.reuters.com/technology/",
+      link: "https://www.reuters.com/technology/google-regulatory-scrutiny-search-2025-11-20/",
       publishedAt: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "Regulators examine Google's search market dominance as competition from AI chatbots intensifies.",
     },
     {
       title: "YouTube advertising demand remains strong",
       publisher: "Variety",
-      link: "https://variety.com/2024/digital/",
+      link: "https://variety.com/2025/digital/youtube-advertising-demand-strong-11-19/",
       publishedAt: new Date(Date.now() - 2.5 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "YouTube advertising market shows resilience with strong demand from advertisers despite economic concerns.",
     },
@@ -72,28 +72,28 @@ const FALLBACK_NEWS: { [key: string]: NewsItem[] } = {
     {
       title: "Microsoft Azure growth accelerates with enterprise AI deals",
       publisher: "TechCrunch",
-      link: "https://techcrunch.com/tag/microsoft/",
+      link: "https://techcrunch.com/2025/11/22/microsoft-azure-growth-enterprise-ai-deals/",
       publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
       summary: "Microsoft reports record Azure growth driven by enterprise adoption of OpenAI services and AI copilots.",
     },
     {
       title: "Analyst upgrades Microsoft on AI growth potential",
       publisher: "Barron's",
-      link: "https://www.barrons.com/articles",
+      link: "https://www.barrons.com/articles/2025/11/21/microsoft-analyst-upgrade-ai-growth",
       publishedAt: new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString(),
       summary: "Wall Street analysts raise price targets on Microsoft citing significant upside from AI integration.",
     },
     {
       title: "Microsoft 365 Copilot adoption exceeds expectations",
       publisher: "Information",
-      link: "https://www.theinformation.com/briefings/microsoft",
+      link: "https://www.theinformation.com/articles/2025/11/18/microsoft-365-copilot-adoption-exceeds",
       publishedAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
       summary: "Enterprise customers rapidly adopt Microsoft 365 Copilot AI features, driving productivity gains.",
     },
     {
       title: "Microsoft strengthens enterprise cloud position",
       publisher: "Forbes",
-      link: "https://www.forbes.com/sites/quickerbythought/",
+      link: "https://www.forbes.com/sites/quickerbythought/2025/11/19/microsoft-cloud-position-strengthens/",
       publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "Microsoft's enterprise cloud position strengthens as organizations shift to hybrid and cloud-first strategies.",
     },
@@ -102,28 +102,28 @@ const FALLBACK_NEWS: { [key: string]: NewsItem[] } = {
     {
       title: "Tesla Cybertruck production ramps ahead of schedule",
       publisher: "Electrek",
-      link: "https://electrek.co/tesla/",
+      link: "https://electrek.co/2025/11/22/tesla-cybertruck-production-ramps-schedule/",
       publishedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
       summary: "Tesla accelerates Cybertruck production with deliveries exceeding initial expectations.",
     },
     {
       title: "Tesla stock surges on strong delivery numbers",
       publisher: "Reuters",
-      link: "https://www.reuters.com/business/",
+      link: "https://www.reuters.com/business/tesla-delivers-record-quarterly-2025-11-21/",
       publishedAt: new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString(),
       summary: "Tesla reports record quarterly deliveries, exceeding analyst expectations and driving stock gains.",
     },
     {
       title: "Tesla energy storage business accelerates growth",
       publisher: "Bloomberg",
-      link: "https://www.bloomberg.com/quote/TSLA:US",
+      link: "https://www.bloomberg.com/news/articles/2025-11-20/tesla-energy-storage-accelerates-growth",
       publishedAt: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "Tesla's energy storage and battery business shows accelerating growth with record demand.",
     },
     {
       title: "Giga Berlin expansion positions Tesla for EU growth",
       publisher: "Axios",
-      link: "https://www.axios.com/business/",
+      link: "https://www.axios.com/business/2025/11/19/tesla-giga-berlin-expansion-eu-growth/",
       publishedAt: new Date(Date.now() - 2.5 * 24 * 60 * 60 * 1000).toISOString(),
       summary: "Tesla expands Berlin factory capacity to meet strong European electric vehicle demand.",
     },

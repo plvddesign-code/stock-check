@@ -7,14 +7,24 @@ const BASE_URL = "https://finnhub.io/api/v1";
 // Fallback to a public/demo key if needed
 const FINNHUB_KEY = process.env.FINNHUB_API_KEY || API_KEY;
 
+export interface AnalystRating {
+  rating: "strong_buy" | "buy" | "hold" | "sell" | "strong_sell";
+  count: number;
+  target?: number;
+  change?: string;
+}
+
 export interface SynthesizedRiskData {
   newsSentiment: {
     recentCount: number;
     newsHeadlines: string[];
     sentimentTone: "positive" | "negative" | "neutral";
+    sentimentScore: number; // -1 to 1
   };
+  analystRating: AnalystRating | null;
   riskFactors: string[];
   catalysts: string[];
+  priceSignals: string[];
   confidence: number;
 }
 
@@ -170,12 +180,51 @@ export async function getBusinessSummary(ticker: string): Promise<{
 }
 
 /**
+ * Get analyst recommendations from Finnhub
+ */
+export async function getAnalystRating(ticker: string): Promise<AnalystRating | null> {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`
+    );
+
+    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      const latest = res.data[0];
+      const totalRatings = latest.buy + latest.hold + latest.sell;
+      
+      // Determine consensus
+      let consensus: AnalystRating["rating"] = "hold";
+      if (latest.strongBuy > totalRatings * 0.3) consensus = "strong_buy";
+      else if (latest.buy > totalRatings * 0.4) consensus = "buy";
+      else if (latest.sell > totalRatings * 0.3) consensus = "sell";
+      else if (latest.strongSell > totalRatings * 0.2) consensus = "strong_sell";
+
+      return {
+        rating: consensus,
+        count: totalRatings,
+        target: latest.targetPrice,
+        change: latest.change,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn(`Failed to fetch analyst ratings for ${ticker}:`, error);
+    return null;
+  }
+}
+
+/**
  * Synthesize risk data from latest news, analyst sentiment, and company events
  */
 export async function synthesizeRiskData(
   ticker: string,
-  news: NewsItem[]
+  news: NewsItem[],
+  currentPrice: number
 ): Promise<SynthesizedRiskData> {
+  // Get analyst rating in parallel
+  const analystRating = await getAnalystRating(ticker);
+
   // Analyze news sentiment
   const recentNews = news.slice(0, 5);
   const newsHeadlines = recentNews.map((n) => n.title);
@@ -186,8 +235,8 @@ export async function synthesizeRiskData(
 
   recentNews.forEach((item) => {
     const titleLower = (item.title + (item.summary || "")).toLowerCase();
-    const positiveKeywords = ["beat", "surge", "strong", "growth", "profit", "upgrade"];
-    const negativeKeywords = ["decline", "miss", "loss", "risk", "warning", "downgrade"];
+    const positiveKeywords = ["beat", "surge", "strong", "growth", "profit", "upgrade", "above", "exceed"];
+    const negativeKeywords = ["decline", "miss", "loss", "risk", "warning", "downgrade", "below", "disappoint"];
 
     positiveKeywords.forEach((kw) => {
       if (titleLower.includes(kw)) positiveCount++;
@@ -197,18 +246,26 @@ export async function synthesizeRiskData(
     });
   });
 
+  const sentimentScore = (positiveCount - negativeCount) / (positiveCount + negativeCount || 1);
   const sentimentTone: "positive" | "negative" | "neutral" =
     positiveCount > negativeCount ? "positive" : negativeCount > positiveCount ? "negative" : "neutral";
 
-  // Identify risk factors from news
+  // Identify risk factors from news and analyst ratings
   const riskFactors: string[] = [];
   if (negativeCount > 0) {
-    riskFactors.push(`Recent news shows ${negativeCount} negative headlines with potential downside risks`);
+    riskFactors.push(`Recent news shows ${negativeCount} negative headlines indicating potential headwinds`);
+  }
+  if (analystRating && (analystRating.rating === "sell" || analystRating.rating === "strong_sell")) {
+    riskFactors.push(`Analyst consensus is ${analystRating.rating.replace('_', ' ')} - selling pressure expected`);
+  }
+  if (analystRating?.target && analystRating.target < currentPrice) {
+    const downside = ((analystRating.target - currentPrice) / currentPrice * 100).toFixed(1);
+    riskFactors.push(`Analysts suggest ${downside}% downside with average price target of $${analystRating.target.toFixed(2)}`);
   }
 
   // Identify catalysts from news
   const catalysts: string[] = [];
-  const upcomingKeywords = ["earnings", "launch", "acquisition", "product", "expansion"];
+  const upcomingKeywords = ["earnings", "launch", "acquisition", "product", "expansion", "ipo", "buyback"];
   recentNews.forEach((item) => {
     upcomingKeywords.forEach((kw) => {
       if (item.title.toLowerCase().includes(kw)) {
@@ -217,14 +274,26 @@ export async function synthesizeRiskData(
     });
   });
 
+  // Identify price signals
+  const priceSignals: string[] = [];
+  if (analystRating?.target && analystRating.target > currentPrice * 1.15) {
+    priceSignals.push(`Analysts see ${((analystRating.target - currentPrice) / currentPrice * 100).toFixed(0)}% upside potential`);
+  }
+  if (sentimentTone === "positive" && positiveCount >= 3) {
+    priceSignals.push(`Strong positive sentiment in recent news could drive momentum`);
+  }
+
   return {
     newsSentiment: {
       recentCount: recentNews.length,
       newsHeadlines,
       sentimentTone,
+      sentimentScore: Math.max(-1, Math.min(1, sentimentScore)),
     },
+    analystRating,
     riskFactors: riskFactors.slice(0, 3),
     catalysts: catalysts.slice(0, 2),
-    confidence: recentNews.length > 0 ? 0.7 : 0.3,
+    priceSignals: priceSignals.slice(0, 2),
+    confidence: (recentNews.length > 0 ? 0.5 : 0) + (analystRating ? 0.5 : 0),
   };
 }

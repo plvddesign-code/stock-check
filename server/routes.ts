@@ -52,8 +52,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Synthesize risk data from news and sentiment
-      const synthesizedRisk = await synthesizeRiskData(upperTicker, news);
+      // Synthesize risk data from news, sentiment, and analyst ratings
+      const synthesizedRisk = await synthesizeRiskData(upperTicker, news, quote.currentPrice);
 
       const aiAnalysis = await generateStockAnalysis(
         upperTicker,

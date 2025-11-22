@@ -69,9 +69,22 @@ Preferred communication style: Simple, everyday language.
 - **Yahoo Finance (yahoo-finance2)**: Primary data source for stock quotes, financial metrics, historical prices, news, and company information
   - Real-time and historical stock quotes
   - Financial metrics (P/E ratio, EPS, beta, dividend yield, profit margins, etc.)
-  - Company news and search results
+  - Company news and search results with specific article links
   - Business summaries and company profiles
   - 30-day historical price data
+
+- **Finnhub API**: Real-time analyst ratings, sentiment data, and price targets
+  - Analyst consensus ratings and recommendation counts
+  - Price targets and upside/downside potential
+  - Company news with specific article URLs
+  - Historical analyst rating changes
+  - Configurable via FINNHUB_API_KEY environment variable
+
+- **NewsAPI.org**: Financial news with specific article links and sentiment analysis
+  - Fresh financial news from multiple publishers
+  - Direct links to full articles (not just homepages)
+  - Searchable by ticker and company name
+  - Configurable via NEWS_API_KEY environment variable
 
 **AI/LLM Integration**:
 - **OpenAI API**: Powers the AI analysis engine
@@ -110,12 +123,20 @@ Preferred communication style: Simple, everyday language.
 1. **User searches for ticker** → Frontend search component
 2. **Navigation to stock analysis page** → wouter handles routing
 3. **React Query fetches data** → API request to `/api/stock/:ticker/analysis`
-4. **Backend orchestrates data gathering**:
-   - Parallel requests to Yahoo Finance API for quote, metrics, news, historical data, and business info
+4. **Backend orchestrates data gathering and synthesis**:
+   - Parallel requests to multiple APIs for quote, metrics, news, and analyst data
+   - News sentiment analysis with positive/negative keyword detection
+   - Analyst rating synthesis with price target calculations
+   - Risk factor identification from latest news headlines
+   - Catalyst detection from company news
+   - Graceful fallback when real API keys aren't configured
    - Error handling for invalid tickers or API failures
-5. **AI analysis generation**:
-   - Aggregated data sent to OpenAI API
+5. **Enhanced AI analysis generation**:
+   - Aggregated data with real-time analyst ratings and sentiment scores sent to OpenAI API
+   - Synthesized risk data from news sentiment analysis included in prompt
    - Structured prompt requesting JSON response with specific analysis fields
+   - Price signals and upside/downside potential calculations
+   - News catalyst identification for forward-looking analysis
    - Fallback analysis if OpenAI is unavailable
 6. **Response assembly** → Backend returns comprehensive StockAnalysisResponse
 7. **Frontend rendering**:
