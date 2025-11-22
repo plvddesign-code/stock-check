@@ -119,7 +119,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         newsRiskSummary = await generateNewsBasedRiskSummary(upperTicker, news, quote, metrics);
       } catch (e) {
-        console.warn(`News risk summary failed for ${upperTicker}, continuing without summary...`);
+        console.warn(`News risk summary failed for ${upperTicker}, using synthesized data as fallback...`);
+        // Fallback: Create risk summary from synthesized risk data
+        if (synthesizedRisk) {
+          const risks: string[] = [];
+          const opportunities: string[] = [];
+          
+          // Add risk factors
+          if (synthesizedRisk.riskFactors && synthesizedRisk.riskFactors.length > 0) {
+            risks.push(...synthesizedRisk.riskFactors);
+          }
+          
+          // Add opportunities from price signals
+          if (synthesizedRisk.priceSignals && synthesizedRisk.priceSignals.length > 0) {
+            opportunities.push(...synthesizedRisk.priceSignals);
+          }
+          
+          // Add sentiment-based opportunities
+          if (synthesizedRisk.newsSentiment?.sentimentTone === "positive") {
+            opportunities.push(`Positive market sentiment: ${synthesizedRisk.newsSentiment.recentCount} recent news articles show optimistic tone about ${upperTicker}`);
+          }
+          
+          // Add analyst-based opportunities
+          if (synthesizedRisk.analystRating?.rating === "buy" || synthesizedRisk.analystRating?.rating === "strong_buy") {
+            const ratingText = synthesizedRisk.analystRating.rating.replace("_", " ");
+            opportunities.push(`Analyst consensus: Strong "${ratingText}" rating from ${synthesizedRisk.analystRating.count || 'multiple'} analysts suggests upside potential`);
+          }
+          
+          // Add catalysts as opportunities
+          if (synthesizedRisk.catalysts && synthesizedRisk.catalysts.length > 0) {
+            opportunities.push(`Market catalysts: Recent news mentions of ${synthesizedRisk.catalysts.slice(0, 2).join(", ")} could drive price movement`);
+          }
+          
+          if (risks.length > 0 || opportunities.length > 0) {
+            newsRiskSummary = {
+              risks: risks.slice(0, 4),
+              opportunities: opportunities.slice(0, 4),
+            };
+          }
+        }
       }
 
       const response: StockAnalysisResponse = {
