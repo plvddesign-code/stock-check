@@ -28,9 +28,9 @@ function getSourceColor(type: string) {
 export function RiskAssessment({ analysis }: RiskAssessmentProps) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
-      <Card className="border-rose-200 dark:border-rose-900 glass backdrop-blur-md">
+      <Card className="border-rose-200 dark:border-rose-900">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 gradient-warm">
+          <CardTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
             <AlertTriangle className="w-5 h-5" />
             Key Risks
           </CardTitle>
@@ -121,9 +121,9 @@ export function RiskAssessment({ analysis }: RiskAssessmentProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-emerald-200 dark:border-emerald-900 glass backdrop-blur-md">
+      <Card className="border-emerald-200 dark:border-emerald-900">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 gradient-success">
+          <CardTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
             <Target className="w-5 h-5" />
             Opportunities
           </CardTitle>

@@ -47,7 +47,7 @@ function MetricCard({ label, value, tooltip, format, testId, health }: MetricCar
     : "";
 
   return (
-    <Card className={`hover-elevate glass ${bgClass} ${health ? "border" : ""} transition-all duration-300`}>
+    <Card className={`hover-elevate ${bgClass} ${health ? "border" : ""}`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
