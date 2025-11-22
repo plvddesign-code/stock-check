@@ -70,8 +70,8 @@ export default function Home() {
               </p>
             </div>
 
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="relative">
+            <form onSubmit={handleSearch} className="flex gap-3">
+              <div className="relative flex-[0.7]">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
                 <Input
                   type="text"
@@ -86,7 +86,7 @@ export default function Home() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 text-base font-semibold"
+                className="flex-[0.3] h-14 text-base font-semibold"
                 data-testid="button-analyze"
               >
                 Analyze Stock
