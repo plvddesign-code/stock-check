@@ -169,6 +169,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/stock/:ticker/historical", async (req, res) => {
+    try {
+      const { ticker } = req.params;
+      const { days } = req.query;
+      
+      if (!ticker || typeof ticker !== "string" || ticker.trim().length === 0) {
+        return res.status(400).json({ error: "Invalid ticker symbol provided" });
+      }
+
+      const numDays = days ? parseInt(days as string, 10) : 30;
+      
+      if (isNaN(numDays) || numDays < 1) {
+        return res.status(400).json({ error: "Invalid days parameter" });
+      }
+
+      try {
+        const historicalPrices = await getYahooHistoricalPrices(ticker.toUpperCase(), numDays);
+        res.json(historicalPrices);
+      } catch (apiError: any) {
+        if (apiError.message?.includes("not found") || apiError.message?.includes("No data")) {
+          return res.status(404).json({ 
+            error: `Stock ticker "${ticker.toUpperCase()}" not found. Please verify the ticker symbol.` 
+          });
+        }
+        throw apiError;
+      }
+    } catch (error: any) {
+      console.error("Stock historical prices error:", error);
+      res.status(502).json({ 
+        error: "Unable to fetch historical price data from external sources. Please try again later." 
+      });
+    }
+  });
+
   app.get("/api/watchlist/:userId", async (req, res) => {
     try {
       const { userId } = req.params;

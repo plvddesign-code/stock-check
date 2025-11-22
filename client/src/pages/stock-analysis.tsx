@@ -17,12 +17,19 @@ import { NewsRiskSummary } from "@/components/news-risk-summary";
 
 export default function StockAnalysis() {
   const [expandedSummary, setExpandedSummary] = useState(false);
+  const [chartPeriodDays, setChartPeriodDays] = useState(30);
   const [, params] = useRoute("/stock/:ticker");
   const [, setLocation] = useLocation();
   const ticker = params?.ticker?.toUpperCase();
 
   const { data, isLoading, error } = useQuery<StockAnalysisResponse>({
     queryKey: ["/api/stock", ticker, "analysis"],
+    enabled: !!ticker,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: chartData, isLoading: chartLoading } = useQuery<Array<{ date: string; close: number }>>({
+    queryKey: ["/api/stock", ticker, "historical", chartPeriodDays],
     enabled: !!ticker,
     staleTime: 5 * 60 * 1000,
   });
@@ -112,7 +119,12 @@ export default function StockAnalysis() {
                   <Activity className="w-5 h-5 text-primary" />
                   <h2 className="text-2xl font-semibold">Price Trend</h2>
                 </div>
-                <PriceChart data={data.historicalPrices} ticker={ticker} />
+                <PriceChart 
+                  data={chartData || data.historicalPrices} 
+                  ticker={ticker}
+                  onPeriodChange={setChartPeriodDays}
+                  isLoading={chartLoading}
+                />
               </div>
 
               <div className="space-y-6 self-start">
