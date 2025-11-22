@@ -169,7 +169,32 @@ Preferred communication style: Simple, everyday language.
 - Parallel API calls to external services
 - Stale-while-revalidate pattern for data freshness
 
+## Build & Deployment Status
+
+**Build Date**: November 22, 2025
+**Build Status**: ✓ Successful
+**Production Ready**: Yes
+- Frontend: Vite compiled and minified
+- Backend: esbuild bundled (dist/index.js - 57KB)
+- Output Size: 828KB total
+
+**Environment Variables Required for Full Features**:
+- `DATABASE_URL` - PostgreSQL connection (optional, uses in-memory storage as fallback)
+- `OPENAI_API_KEY` - AI analysis generation
+- `FINNHUB_API_KEY` - Analyst ratings and price targets (optional)
+- `SESSION_SECRET` - Session management
+
+**Deployment Ready**: The project is packaged in `dist/` folder and ready to deploy to:
+- Replit (native deployment via publish button)
+- Any Node.js hosting platform
+- Docker containers
+
 ## Recent Enhancements
+
+### News Date Formatting (Updated Nov 22, 2025)
+- **Format**: "22 November 2025 • 14:30" (with full month name and 24-hour time)
+- Displays meaningful, human-readable publication timestamps
+- Improved date parsing for timezone consistency
 
 ### Key Metrics Section (Enhanced Nov 22, 2025)
 - **Color-Coded Health Status**: Each metric now displays with visual indicators:
