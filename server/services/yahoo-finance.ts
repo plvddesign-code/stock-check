@@ -390,3 +390,36 @@ export async function getBusinessSummary(ticker: string): Promise<{
     };
   }
 }
+
+export async function searchCompanies(
+  query: string
+): Promise<Array<{ ticker: string; name: string; exchange: string }>> {
+  try {
+    if (!query || query.trim().length < 1) {
+      return [];
+    }
+
+    const results = await yahooFinance.search(query.trim(), {
+      quotesCount: 10,
+      newsCount: 0,
+      listsCount: 0,
+      enableFuzzyQuery: true,
+    });
+
+    if (!results.quotes || results.quotes.length === 0) {
+      return [];
+    }
+
+    return results.quotes
+      .filter((q: any) => q.symbol && q.symbol.trim())
+      .map((q: any) => ({
+        ticker: q.symbol,
+        name: q.shortname || q.longname || q.symbol,
+        exchange: q.exchDisp || "Unknown",
+      }))
+      .slice(0, 10);
+  } catch (error) {
+    console.error("Error searching companies:", error);
+    return [];
+  }
+}

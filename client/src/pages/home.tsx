@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Search, TrendingUp, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { TrendingUp, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/search-input";
 
 export default function Home() {
   const [ticker, setTicker] = useState("");
   const [, setLocation] = useLocation();
+
+  const handleSearchSelect = (selectedTicker: string) => {
+    setLocation(`/stock/${selectedTicker}`);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,18 +77,16 @@ export default function Home() {
             </div>
 
             <form onSubmit={handleSearch} className="flex gap-3">
-              <div className="relative flex-[0.8]">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/50" />
-                <Input
-                  type="text"
-                  placeholder="Enter stock ticker (e.g., AAPL, TSLA, MSFT)"
-                  value={ticker}
-                  onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                  className="pl-12 h-14 text-lg bg-background/60 border-foreground/20 text-foreground placeholder:text-foreground/50"
-                  data-testid="input-ticker-search"
-                  aria-label="Stock ticker search input"
-                />
-              </div>
+              <SearchInput
+                value={ticker}
+                onChange={setTicker}
+                onSelect={handleSearchSelect}
+                onSubmit={() => {
+                  if (ticker.trim()) {
+                    setLocation(`/stock/${ticker.toUpperCase()}`);
+                  }
+                }}
+              />
               <Button
                 type="submit"
                 size="lg"
@@ -94,7 +96,7 @@ export default function Home() {
                 }}
                 data-testid="button-analyze"
               >
-                Analyze Stock
+                Analyze
               </Button>
             </form>
 

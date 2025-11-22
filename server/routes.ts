@@ -8,7 +8,8 @@ import {
   getStockMetrics as getYahooMetrics,
   getBusinessSummary as getCompanyInfo,
   getHistoricalPrices as getYahooHistoricalPrices,
-  getStockNews as getYahooNews
+  getStockNews as getYahooNews,
+  searchCompanies as searchYahooCompanies
 } from "./services/yahoo-finance";
 import { 
   getAnalystRating,
@@ -230,6 +231,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Add to watchlist error:", error);
       res.status(500).json({ error: "Failed to add to watchlist" });
+    }
+  });
+
+  app.get("/api/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      
+      if (!q || typeof q !== "string" || q.trim().length < 1) {
+        return res.json([]);
+      }
+
+      const results = await searchYahooCompanies(q);
+      res.json(results);
+    } catch (error: any) {
+      console.error("Search error:", error);
+      res.json([]);
     }
   });
 
