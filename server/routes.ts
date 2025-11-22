@@ -20,7 +20,7 @@ import {
 } from "./services/alpha-vantage";
 import { generateStockAnalysis, generateNewsBasedRiskSummary } from "./services/openai";
 import { synthesizeRiskData } from "./services/finnhub";
-import type { StockAnalysisResponse } from "@shared/schema";
+import type { StockAnalysisResponse, StockQuote, StockMetrics, NewsItem } from "@shared/schema";
 import { insertWatchlistSchema } from "@shared/schema";
 
 // Use database storage if available, otherwise fallback to memory storage
@@ -38,7 +38,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const upperTicker = ticker.toUpperCase();
 
-      let quote, metrics, news, historicalPrices, businessInfo;
+      let quote: StockQuote;
+      let metrics: StockMetrics;
+      let news: NewsItem[];
+      let historicalPrices: Array<{ date: string; close: number }>;
+      let businessInfo: { businessSummary: string; sector: string; industry: string };
 
       try {
         // Fetch real data from Yahoo Finance (primary source)
@@ -131,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       try {
-        const quote = await getStockQuote(ticker.toUpperCase());
+        const quote = await getYahooQuote(ticker.toUpperCase());
         res.json(quote);
       } catch (apiError: any) {
         if (apiError.message?.includes("not found") || apiError.message?.includes("No data")) {
