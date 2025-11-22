@@ -115,7 +115,7 @@ export default function StockAnalysis() {
                 <PriceChart data={data.historicalPrices} ticker={ticker} />
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-6 self-start">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">What This Company Does</CardTitle>
