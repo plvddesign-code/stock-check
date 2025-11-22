@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { ArrowLeft, Sparkles, TrendingDown, TrendingUp, AlertTriangle, Target, BarChart3, Newspaper, Activity } from "lucide-react";
+import { ArrowLeft, Sparkles, TrendingDown, TrendingUp, AlertTriangle, Target, BarChart3, Newspaper, Activity, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import { NewsList } from "@/components/news-list";
 import { RiskAssessment } from "@/components/risk-assessment";
 
 export default function StockAnalysis() {
+  const [expandedSummary, setExpandedSummary] = useState(false);
   const [, params] = useRoute("/stock/:ticker");
   const [, setLocation] = useLocation();
   const ticker = params?.ticker?.toUpperCase();
@@ -118,10 +120,34 @@ export default function StockAnalysis() {
                   <CardHeader>
                     <CardTitle className="text-lg">What This Company Does</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed" data-testid="text-business-summary">
+                  <CardContent className="space-y-3">
+                    <p 
+                      className={`text-muted-foreground leading-relaxed ${!expandedSummary ? 'line-clamp-2' : ''}`}
+                      data-testid="text-business-summary"
+                    >
                       {data.businessSummary}
                     </p>
+                    {data.businessSummary.length > 150 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedSummary(!expandedSummary)}
+                        className="text-primary hover:text-primary/80 p-0 h-auto font-medium"
+                        data-testid="button-read-more"
+                      >
+                        {expandedSummary ? (
+                          <>
+                            Read less
+                            <ChevronUp className="w-4 h-4 ml-1" />
+                          </>
+                        ) : (
+                          <>
+                            Read more
+                            <ChevronDown className="w-4 h-4 ml-1" />
+                          </>
+                        )}
+                      </Button>
+                    )}
                     <div className="mt-4 flex gap-2">
                       <Badge variant="secondary" data-testid="badge-sector">{data.sector}</Badge>
                       <Badge variant="secondary" data-testid="badge-industry">{data.industry}</Badge>
