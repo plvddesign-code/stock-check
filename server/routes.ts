@@ -7,7 +7,8 @@ import {
   getStockQuote as getYahooQuote,
   getStockMetrics as getYahooMetrics,
   getBusinessSummary as getCompanyInfo,
-  getHistoricalPrices as getYahooHistoricalPrices
+  getHistoricalPrices as getYahooHistoricalPrices,
+  getStockNews as getYahooNews
 } from "./services/yahoo-finance";
 import { 
   getAnalystRating,
@@ -61,12 +62,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.warn(`Finnhub analyst rating failed for ${upperTicker}, continuing without it...`);
         }
 
-        // Get news from Finnhub, fallback to empty if it fails
+        // Get news from Yahoo Finance (primary source), fallback to Finnhub
         try {
-          news = await getStockNews(upperTicker);
+          news = await getYahooNews(upperTicker);
         } catch (e) {
-          console.warn(`Finnhub news failed for ${upperTicker}, continuing with empty news...`);
-          news = [];
+          console.warn(`Yahoo Finance news failed for ${upperTicker}, trying Finnhub...`);
+          try {
+            news = await getStockNews(upperTicker);
+          } catch (finnhubError) {
+            console.warn(`Finnhub news also failed for ${upperTicker}, continuing with empty news...`);
+            news = [];
+          }
         }
       } catch (apiError: any) {
         if (apiError.message?.includes("not found") || apiError.message?.includes("No data")) {
