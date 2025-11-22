@@ -402,8 +402,6 @@ export async function searchCompanies(
     const results = await yahooFinance.search(query.trim(), {
       quotesCount: 10,
       newsCount: 0,
-      listsCount: 0,
-      enableFuzzyQuery: true,
     });
 
     if (!results.quotes || results.quotes.length === 0) {
