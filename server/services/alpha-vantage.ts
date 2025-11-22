@@ -1,6 +1,7 @@
 import axios from "axios";
 import type { StockQuote, StockMetrics, NewsItem } from "@shared/schema";
 import { getFinancialNews } from "./news";
+import { getMetricsFromOfficialReports, validateMetricsRecency } from "./financial-reports";
 
 const API_KEY = process.env.ALPHA_VANTAGE_API_KEY || "demo";
 const BASE_URL = "https://www.alphavantage.co/query";
@@ -135,6 +136,21 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
 }
 
 export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
+  // First try to fetch from official reports (SEC EDGAR or Alpha Vantage fundamental data)
+  try {
+    const officialData = await getMetricsFromOfficialReports(ticker);
+    if (officialData && officialData.metrics && Object.values(officialData.metrics).some(v => v !== null)) {
+      const recency = validateMetricsRecency(officialData.reportDate);
+      if (recency.isRecent || recency.quality === "current") {
+        console.log(`Using metrics from official reports for ${ticker} (${recency.quality}, ${recency.daysOld} days old)`);
+        return officialData.metrics;
+      }
+    }
+  } catch (error) {
+    console.warn(`Could not fetch official metrics for ${ticker}:`, error);
+  }
+
+  // Fallback to demo/hardcoded data
   const metricsData: { [key: string]: StockMetrics } = {
     "AAPL": {
       peRatio: 28.5,
