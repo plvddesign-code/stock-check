@@ -1,0 +1,149 @@
+# StockSense - AI Stock Analysis Platform
+
+## Overview
+
+StockSense is an AI-powered stock analysis platform designed to make financial data accessible to retail investors of all levels. Unlike traditional platforms that overwhelm users with technical charts and jargon, StockSense provides plain-English explanations of stock movements, financial metrics, risks, and opportunities. The platform integrates official financial data with AI-powered analysis to deliver comprehensive "stock stories" for any ticker symbol.
+
+The application serves as an AI interpreter rather than just another dashboard, focusing on clarity and human-readable insights over technical complexity. Users can search for any stock ticker and receive a detailed analysis that includes financial metrics, AI-generated insights, price trends, recent news, and risk/opportunity assessments.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+
+**Framework**: React with TypeScript using Vite as the build tool
+
+**UI Component System**: shadcn/ui components built on Radix UI primitives
+- Provides accessible, customizable components following the "New York" style variant
+- Uses Tailwind CSS for styling with a custom design system
+- Component library includes cards, buttons, badges, forms, dialogs, and data visualization elements
+
+**Design Philosophy**: Hybrid approach combining Linear's clean data presentation, ChatGPT's conversational clarity, and Stripe's minimalist precision
+- Single-column narrative flow instead of traditional dashboard grids
+- Typography system using Inter for UI/data and Space Mono for tickers/numbers
+- Generous whitespace and clear visual hierarchy
+- Focus on making complexity approachable through conversational design
+
+**Routing**: wouter (lightweight client-side routing)
+- Home page with search functionality
+- Stock analysis page with dynamic ticker parameter
+- 404 fallback page
+
+**State Management**: TanStack Query (React Query) for server state management
+- Handles data fetching, caching, and synchronization
+- 5-minute stale time for stock analysis data
+- Custom query client with fetch-based data fetching
+
+**Data Visualization**: Recharts library for stock price charts
+- 30-day historical price movement visualization
+- Minimal, clean chart design aligned with overall aesthetic
+
+### Backend Architecture
+
+**Runtime**: Node.js with Express.js framework
+
+**Development/Production Split**:
+- Development mode uses Vite middleware for hot module replacement
+- Production mode serves pre-built static assets
+- Separate entry points (index-dev.ts and index-prod.ts) for different environments
+
+**API Design**: RESTful endpoints
+- `/api/stock/:ticker/analysis` - Primary endpoint for comprehensive stock analysis
+- Returns aggregated data from multiple sources with AI-generated insights
+
+**Database Integration**: Optional PostgreSQL database using Drizzle ORM
+- Gracefully degrades to in-memory storage when database is unavailable
+- Storage abstraction layer (IStorage interface) allows swapping between DB and memory implementations
+- Schema includes users and watchlist tables (future feature support)
+
+**Database Connection**: Neon serverless PostgreSQL with WebSocket support
+- Connection pooling for efficient resource usage
+- Configuration via DATABASE_URL environment variable
+
+### External Dependencies
+
+**Financial Data APIs**:
+- **Yahoo Finance (yahoo-finance2)**: Primary data source for stock quotes, financial metrics, historical prices, news, and company information
+  - Real-time and historical stock quotes
+  - Financial metrics (P/E ratio, EPS, beta, dividend yield, profit margins, etc.)
+  - Company news and search results
+  - Business summaries and company profiles
+  - 30-day historical price data
+
+**AI/LLM Integration**:
+- **OpenAI API**: Powers the AI analysis engine
+  - Model: GPT-5 (configured as the newest model)
+  - Generates plain-English summaries of stock analysis
+  - Provides buy/hold/sell recommendations with confidence scores
+  - Identifies risks and opportunities
+  - Creates financial health assessments
+  - Fallback mechanism when API key is not configured
+
+**UI Component Libraries**:
+- **Radix UI**: Headless accessible component primitives
+- **shadcn/ui**: Pre-styled component collection
+- **Recharts**: Charting library for data visualization
+- **Lucide React**: Icon library
+
+**Styling & Utilities**:
+- **Tailwind CSS**: Utility-first CSS framework with custom configuration
+- **class-variance-authority**: Component variant management
+- **clsx & tailwind-merge**: Conditional className utilities
+
+**Form Management**:
+- **React Hook Form**: Form state and validation
+- **Zod**: Schema validation
+- **@hookform/resolvers**: Integration between React Hook Form and Zod
+
+**Development Tools**:
+- **TypeScript**: Type safety across the entire application
+- **Drizzle Kit**: Database migrations and schema management
+- **tsx**: TypeScript execution for development server
+- **esbuild**: Fast bundling for production builds
+- **Replit plugins**: Development banner, error overlay, and cartographer for Replit environment
+
+### Data Flow Architecture
+
+1. **User searches for ticker** → Frontend search component
+2. **Navigation to stock analysis page** → wouter handles routing
+3. **React Query fetches data** → API request to `/api/stock/:ticker/analysis`
+4. **Backend orchestrates data gathering**:
+   - Parallel requests to Yahoo Finance API for quote, metrics, news, historical data, and business info
+   - Error handling for invalid tickers or API failures
+5. **AI analysis generation**:
+   - Aggregated data sent to OpenAI API
+   - Structured prompt requesting JSON response with specific analysis fields
+   - Fallback analysis if OpenAI is unavailable
+6. **Response assembly** → Backend returns comprehensive StockAnalysisResponse
+7. **Frontend rendering**:
+   - Stock header with current price and change
+   - AI summary card with recommendation badge
+   - Metrics grid with tooltips
+   - Price chart visualization
+   - News list with external links
+   - Risk/opportunity assessment cards
+
+### Authentication & Session Management (Prepared but Not Active)
+
+- Session storage configured with connect-pg-simple
+- User schema defined in database
+- Storage interfaces support user CRUD operations
+- Currently not enforced on routes (future feature)
+
+### Error Handling Strategy
+
+- Graceful degradation when database is unavailable
+- Specific error messages for common scenarios (404 for invalid tickers, 502 for API failures)
+- User-friendly error pages with actionable messages
+- Development vs production error handling differentiation
+
+### Performance Optimizations
+
+- React Query caching reduces redundant API calls
+- Vite's fast HMR in development
+- Static asset serving in production
+- Parallel API calls to external services
+- Stale-while-revalidate pattern for data freshness
