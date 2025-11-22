@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { StockQuote, StockMetrics, NewsItem, AIAnalysis } from "@shared/schema";
+import { enrichMetrics, generateRiskNarrative, type EnrichedMetrics } from "./financial-metrics";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = process.env.OPENAI_API_KEY 
@@ -19,25 +20,39 @@ export async function generateStockAnalysis(
   }
 
   try {
+    // Calculate enriched metrics for more specific risk analysis
+    const enriched = enrichMetrics(quote, metrics);
+    const riskNarrative = generateRiskNarrative(enriched);
+
     const prompt = `You are a financial analyst helping retail investors understand stocks in plain English.
 
-Analyze ${ticker} (${quote.companyName}) and provide insights:
+Analyze ${ticker} (${quote.companyName}) with SPECIFIC, DATA-BACKED conclusions:
 
-CURRENT DATA:
+CURRENT PRICE & MOMENTUM:
 - Price: $${quote.currentPrice} (${quote.changePercent >= 0 ? '+' : ''}${quote.changePercent.toFixed(2)}%)
-- Market Cap: $${(quote.marketCap / 1e9).toFixed(2)}B
-- P/E Ratio: ${metrics.peRatio ?? 'N/A'}
-- EPS: ${metrics.eps ?? 'N/A'}
-- Beta: ${metrics.beta ?? 'N/A'}
-- Dividend Yield: ${metrics.dividendYield ? (metrics.dividendYield * 100).toFixed(2) + '%' : 'N/A'}
-- Profit Margin: ${metrics.profitMargin ? (metrics.profitMargin * 100).toFixed(2) + '%' : 'N/A'}
-- Debt/Equity: ${metrics.debtToEquity ?? 'N/A'}
-- ROE: ${metrics.returnOnEquity ? (metrics.returnOnEquity * 100).toFixed(2) + '%' : 'N/A'}
-- Revenue Growth: ${metrics.revenueGrowth ? (metrics.revenueGrowth * 100).toFixed(2) + '%' : 'N/A'}
+- Volume: ${(quote.volume / 1e6).toFixed(1)}M shares daily
+- 52-week Range: $${quote.fiftyTwoWeekLow.toFixed(2)} - $${quote.fiftyTwoWeekHigh.toFixed(2)}
+
+VALUATION & PROFITABILITY:
+- P/E Ratio: ${metrics.peRatio?.toFixed(1) ?? 'N/A'} (${enriched.valuationRisk.peRatioRisk})
+- Profit Margin: ${metrics.profitMargin ? (metrics.profitMargin * 100).toFixed(1) : 'N/A'}% (${enriched.profitabilityRisk.marginTrend})
+- EPS: $${metrics.eps?.toFixed(2) ?? 'N/A'}
+- ROE: ${metrics.returnOnEquity ? (metrics.returnOnEquity * 100).toFixed(1) : 'N/A'}%
+
+FINANCIAL HEALTH:
+- Debt/Equity: ${metrics.debtToEquity?.toFixed(2) ?? 'N/A'} (${enriched.leverageRisk.debtRisk})
+- Revenue Growth: ${metrics.revenueGrowth ? (metrics.revenueGrowth * 100).toFixed(1) : 'N/A'}% (${enriched.growthRisk.growthRealism})
+- Beta: ${metrics.beta?.toFixed(2) ?? 'N/A'} (${enriched.volatilityRisk.volatilityLevel})
+- Dividend Yield: ${metrics.dividendYield ? (metrics.dividendYield * 100).toFixed(2) + '%' : 'None'}
+
+RISK ASSESSMENT:
+- Overall Risk Score: ${enriched.overallRiskScore}/10 (${enriched.riskProfile} profile)
+- Key Risks: ${riskNarrative.keyRisks.slice(0, 3).join('; ') || 'None identified'}
+- Key Opportunities: ${riskNarrative.keyOpportunities.slice(0, 3).join('; ') || 'Standard growth prospects'}
 
 BUSINESS: ${businessSummary}
 
-RECENT NEWS: ${news.slice(0, 3).map(n => `- ${n.title}`).join('\n')}
+RECENT NEWS: ${news.slice(0, 3).map(n => `- ${n.title} (${n.publisher})`).join('\n')}
 
 Provide analysis in JSON format with DETAILED, DATA-BACKED reasoning:
 {
@@ -78,15 +93,17 @@ Provide analysis in JSON format with DETAILED, DATA-BACKED reasoning:
   "sentimentScore": 1-10 (based on news and market sentiment)
 }
 
-IMPORTANT:
-- Use ACTUAL financial metrics from the data provided to back up each claim
-- Label each source: (Official/Market/Rumor/Insider/News)
-- Include BOTH "why" it's a risk AND "why not" counterarguments
-- Provide specific numbers, percentages, comparisons, and dates
-- Explain cause and effect relationships between metrics
-- Avoid generic statements - every risk/opportunity must be data-backed
+IMPORTANT INSTRUCTIONS:
+1. BASE ALL RECOMMENDATIONS ON THE SPECIFIC METRICS PROVIDED
+2. Use actual numbers from the data - don't generalize
+3. For each risk/opportunity, explain the MECHANISM (e.g., "Debt/Equity of ${metrics.debtToEquity?.toFixed(2)} means $X of debt per $1 of equity, which limits financial flexibility when...")
+4. Label each source accurately: Official (earnings/filings), Market (analyst data), News (recent articles)
+5. Include BOTH "why" it matters AND "why not" (counterarguments)
+6. Confidence should reflect data quality: High confidence if metrics align, Lower if mixed signals
+7. Risk severity: HIGH if metric crosses safety threshold, MEDIUM if approaching concern, LOW if manageable
+8. Opportunity potential: HIGH if strong tailwind, MEDIUM if encouraging trend, LOW if speculative
 
-Focus on clarity with specific evidence.`;
+Focus on DATA-BACKED specificity over generic financial advice.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5",
