@@ -45,13 +45,25 @@ Provide analysis in JSON format:
   "recommendation": "BUY" | "HOLD" | "SELL",
   "confidence": 0.0 to 1.0,
   "reasoning": "Clear explanation of why this recommendation makes sense",
-  "risks": ["risk 1", "risk 2", "risk 3"] (3-5 key risks),
-  "opportunities": ["opportunity 1", "opportunity 2"] (2-4 opportunities),
+  "risks": [
+    "Risk title: Simple one-line risk description that a beginner can understand",
+    "Risk title: Another clear risk explanation without jargon"
+  ] (3-5 key risks, each as a simple, beginner-friendly sentence or two),
+  "opportunities": [
+    "Opportunity title: What could go well and why it matters for investors",
+    "Opportunity title: Another positive factor explained simply"
+  ] (2-4 opportunities, each beginner-friendly),
   "financialHealthScore": 1-10 (overall financial health),
   "sentimentScore": 1-10 (based on news and market sentiment)
 }
 
-Focus on clarity and actionable insights. Avoid jargon.`;
+IMPORTANT: Write risks and opportunities in language a complete beginner can understand. Avoid financial jargon.
+For each risk/opportunity, explain WHAT it is and WHY it matters in everyday language.
+Examples:
+- Good risk: "High debt levels: The company has a lot of borrowing, which means more money goes to paying interest instead of growing the business"
+- Good opportunity: "Strong profit margins: The company keeps more money from each sale, which could mean better returns for investors"
+
+Focus on clarity, simplicity, and actionable insights.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5",
@@ -116,13 +128,13 @@ function createFallbackAnalysis(
     confidence: 0.6,
     reasoning: "Basic analysis based on financial metrics. For detailed AI-powered insights, please configure your OpenAI API key.",
     risks: [
-      "AI-powered risk analysis unavailable",
-      "Market volatility may impact stock performance",
-      "Review detailed financial reports for comprehensive risk assessment"
+      "Limited data: Without real-time pricing data, we can't catch last-minute price swings that might signal problems",
+      "Market changes: Stock prices go up and down based on overall market conditions that are hard to predict",
+      "Company challenges: Any unexpected problems in the business (like losing a major customer) would affect the stock"
     ],
     opportunities: [
-      "AI-powered opportunity analysis unavailable",
-      "Review recent news and market trends for potential catalysts"
+      "Growth potential: The company might grow faster than expected if their business expands",
+      "Market demand: If customers suddenly want more of what they sell, the stock price could rise significantly"
     ],
     financialHealthScore: healthScore,
     sentimentScore,
