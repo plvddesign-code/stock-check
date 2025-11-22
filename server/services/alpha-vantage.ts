@@ -275,7 +275,44 @@ const DEMO_DATA: { [key: string]: any } = {
 
 export async function getStockQuote(ticker: string): Promise<StockQuote> {
   try {
+    // Try real API first (even with demo key, it may work)
+    try {
+      const res = await axios.get(BASE_URL, {
+        params: {
+          function: "GLOBAL_QUOTE",
+          symbol: ticker.toUpperCase(),
+          apikey: API_KEY,
+        },
+        timeout: 5000,
+      });
+
+      const quote = res.data["Global Quote"];
+      if (quote && quote["05. price"]) {
+        console.log(`Fetched real data for ${ticker} from Alpha Vantage`);
+        return {
+          symbol: ticker.toUpperCase(),
+          companyName: ticker,
+          currentPrice: parseFloat(quote["05. price"]),
+          previousClose: parseFloat(quote["08. previous close"]),
+          change: parseFloat(quote["09. change"]),
+          changePercent: parseFloat(quote["10. change percent"]) || 0,
+          marketCap: 0,
+          volume: parseInt(quote["06. volume"]) || 0,
+          averageVolume: 0,
+          high: parseFloat(quote["03. high"]),
+          low: parseFloat(quote["04. low"]),
+          open: parseFloat(quote["02. open"]),
+          fiftyTwoWeekHigh: 0,
+          fiftyTwoWeekLow: 0,
+        };
+      }
+    } catch (apiError: any) {
+      console.warn(`Real API call failed for ${ticker}:`, apiError.message);
+    }
+
+    // Fallback to demo data only if real API fails
     if (DEMO_DATA[ticker.toUpperCase()]) {
+      console.log(`Using fallback demo data for ${ticker}`);
       const demoQuote = DEMO_DATA[ticker.toUpperCase()].quote;
       return {
         symbol: ticker.toUpperCase(),
@@ -295,41 +332,9 @@ export async function getStockQuote(ticker: string): Promise<StockQuote> {
       };
     }
 
-    const res = await axios.get(BASE_URL, {
-      params: {
-        function: "GLOBAL_QUOTE",
-        symbol: ticker.toUpperCase(),
-        apikey: API_KEY,
-      },
-      timeout: 5000,
-    });
-
-    const quote = res.data["Global Quote"];
-    if (!quote || !quote["05. price"]) {
-      if (API_KEY === "demo") {
-        throw new Error(`Demo API key doesn't support ${ticker}. Please set ALPHA_VANTAGE_API_KEY environment variable.`);
-      }
-      throw new Error(`Stock data not found for ticker: ${ticker}`);
-    }
-
-    return {
-      symbol: ticker.toUpperCase(),
-      companyName: ticker,
-      currentPrice: parseFloat(quote["05. price"]),
-      previousClose: parseFloat(quote["08. previous close"]),
-      change: parseFloat(quote["09. change"]),
-      changePercent: parseFloat(quote["10. change percent"]) || 0,
-      marketCap: 0,
-      volume: parseInt(quote["06. volume"]) || 0,
-      averageVolume: 0,
-      high: parseFloat(quote["03. high"]),
-      low: parseFloat(quote["04. low"]),
-      open: parseFloat(quote["02. open"]),
-      fiftyTwoWeekHigh: 0,
-      fiftyTwoWeekLow: 0,
-    };
+    throw new Error(`Stock data not found for ticker: ${ticker}`);
   } catch (error: any) {
-    console.error("Alpha Vantage quote error:", error.message);
+    console.error("Stock quote error:", error.message);
     throw new Error(`Failed to fetch stock data for ${ticker}`);
   }
 }
@@ -342,7 +347,19 @@ export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
       const recency = validateMetricsRecency(officialData.reportDate);
       if (recency.isRecent || recency.quality === "current") {
         console.log(`Using metrics from official reports for ${ticker} (${recency.quality}, ${recency.daysOld} days old)`);
-        return officialData.metrics;
+        // Add health statuses to official metrics
+        const baseMetrics = officialData.metrics;
+        return {
+          ...baseMetrics,
+          peHealth: calculateMetricHealth("peRatio", baseMetrics.peRatio),
+          epsHealth: calculateMetricHealth("eps", baseMetrics.eps),
+          betaHealth: calculateMetricHealth("beta", baseMetrics.beta),
+          dividendHealth: calculateMetricHealth("dividendYield", baseMetrics.dividendYield),
+          marginHealth: calculateMetricHealth("profitMargin", baseMetrics.profitMargin),
+          debtHealth: calculateMetricHealth("debtToEquity", baseMetrics.debtToEquity),
+          roeHealth: calculateMetricHealth("returnOnEquity", baseMetrics.returnOnEquity),
+          growthHealth: calculateMetricHealth("revenueGrowth", baseMetrics.revenueGrowth),
+        };
       }
     }
   } catch (error) {
@@ -350,6 +367,7 @@ export async function getStockMetrics(ticker: string): Promise<StockMetrics> {
   }
 
   // Fallback to demo/hardcoded data
+  console.log(`Using fallback demo metrics for ${ticker}`);
   const metricsData: { [key: string]: StockMetrics } = {
     "AAPL": {
       peRatio: 28.5,

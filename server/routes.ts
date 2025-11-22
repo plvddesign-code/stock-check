@@ -4,10 +4,17 @@ import { db } from "./db";
 import { dbStorage } from "./db-storage";
 import { storage as memStorage } from "./storage";
 import { 
-  getStockQuote, 
-  getStockMetrics, 
-  getStockNews, 
-  getHistoricalPrices,
+  getStockQuote as getYahooQuote,
+  getStockMetrics as getYahooMetrics,
+  getBusinessSummary as getCompanyInfo,
+  getHistoricalPrices as getYahooHistoricalPrices
+} from "./services/yahoo-finance";
+import { 
+  getAnalystRating,
+  getStockNews
+} from "./services/finnhub";
+import { 
+  getStockMetrics as getAlphaMetrics,
   getBusinessSummary 
 } from "./services/alpha-vantage";
 import { generateStockAnalysis } from "./services/openai";
@@ -33,13 +40,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let quote, metrics, news, historicalPrices, businessInfo;
 
       try {
-        [quote, metrics, news, historicalPrices, businessInfo] = await Promise.all([
-          getStockQuote(upperTicker),
-          getStockMetrics(upperTicker),
-          getStockNews(upperTicker),
-          getHistoricalPrices(upperTicker, 30),
-          getBusinessSummary(upperTicker),
+        // Fetch real data from Yahoo Finance (primary source)
+        const [yahooQuote, yahooMetrics, yahooHistory, companyInfo] = await Promise.all([
+          getYahooQuote(upperTicker),
+          getYahooMetrics(upperTicker),
+          getYahooHistoricalPrices(upperTicker, 30),
+          getCompanyInfo(upperTicker),
         ]);
+
+        quote = yahooQuote;
+        metrics = yahooMetrics;
+        historicalPrices = yahooHistory;
+        businessInfo = companyInfo;
+
+        // Try to get analyst rating and news from Finnhub (optional - fallback to empty arrays)
+        let analystRating = null;
+        try {
+          analystRating = await getAnalystRating(upperTicker);
+        } catch (e) {
+          console.warn(`Finnhub analyst rating failed for ${upperTicker}, continuing without it...`);
+        }
+
+        // Get news from Finnhub, fallback to empty if it fails
+        try {
+          news = await getStockNews(upperTicker);
+        } catch (e) {
+          console.warn(`Finnhub news failed for ${upperTicker}, continuing with empty news...`);
+          news = [];
+        }
       } catch (apiError: any) {
         if (apiError.message?.includes("not found") || apiError.message?.includes("No data")) {
           return res.status(404).json({ 

@@ -1,5 +1,7 @@
-import yahooFinance from "yahoo-finance2";
+import YahooFinance from "yahoo-finance2";
 import type { StockQuote, StockMetrics, NewsItem } from "@shared/schema";
+
+const yahooFinance = new YahooFinance();
 
 export async function getStockQuote(ticker: string): Promise<StockQuote> {
   const quote = await yahooFinance.quote(ticker);
